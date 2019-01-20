@@ -1,4 +1,4 @@
-package com.asav.flexi;
+package com.asav.flexis;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -12,7 +12,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firestore.v1beta1.WriteResult;
 
 import java.util.HashMap;
 import java.util.Map;

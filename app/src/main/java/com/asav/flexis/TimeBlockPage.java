@@ -1,4 +1,4 @@
-package com.asav.flexi;
+package com.asav.flexis;
 
 import android.app.TimePickerDialog;
 import android.support.v7.app.AppCompatActivity;

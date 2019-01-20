@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "178253717016",
+    "firebase_url": "https://flexis-8e990.firebaseio.com",
+    "project_id": "flexis-8e990",
+    "storage_bucket": "flexis-8e990.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178253717016:android:d5ceacaecda026e0",
+        "android_client_info": {
+          "package_name": "com.asav.flexis"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "178253717016-ko6o53uk8kev9lnn14gasvqs4g0q1sn7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.asav.flexis",
+            "certificate_hash": "d131c73ab5c2697f9750092d55c05ceff33b320c"
+          }
+        },
+        {
+          "client_id": "178253717016-c0il2mps70in137hdmhce0kp5hms2g2q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCFh3QrNo9mYi2VaUe0TtWBUULFHg0FwR4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "178253717016-l8gtmouidcf5hffadea7fs8l7do7v1cv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

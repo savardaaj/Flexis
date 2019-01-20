@@ -1,4 +1,4 @@
-package com.asav.flexi;
+package com.asav.flexis;
 
 public class TimeBlock {
 
