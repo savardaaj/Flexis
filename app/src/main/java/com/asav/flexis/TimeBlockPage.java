@@ -1,6 +1,7 @@
 package com.asav.flexis;
 
 import android.app.TimePickerDialog;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,13 +15,14 @@ public class TimeBlockPage extends AppCompatActivity {
 
     DatabaseHandler dbh = new DatabaseHandler();
 
+    ConstraintLayout cl;
     EditText et_name, et_description, et_startTime, et_endTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("***DEBUG***", "inside onCreate TimeBlockPage");
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_blockpage);
+        setContentView(R.layout.activity_blockpage);
 
         initializeLayout();
         setupTimePickers();
@@ -28,8 +30,14 @@ public class TimeBlockPage extends AppCompatActivity {
 
     }
 
+
+
     public void initializeLayout() {
-       //et_name = findViewById(R.id.et_name);
+        cl = findViewById(R.id.cl_blockPage);
+        et_name = cl.findViewById(R.id.et_BlockName);
+        et_description = cl.findViewById(R.id.et_BlockDescription);
+        et_startTime = cl.findViewById(R.id.et_BlockStartTime);
+        et_endTime = cl.findViewById(R.id.et_BlockEndTime);
     }
 
     public void setupTimePickers() {
@@ -77,7 +85,7 @@ public class TimeBlockPage extends AppCompatActivity {
         });
     }
 
-    public void onClickSaveBlockTime(View v) {
+    public void onClickSaveTimeBlock(View v) {
         Log.d("***DEBUG***", "inside onClickSaveBlockTime");
 
         TimeBlock timeblock = new TimeBlock();

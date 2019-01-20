@@ -21,7 +21,7 @@
             android:orientation="vertical">
 
             <EditText
-                android:id="@+id/et_Name"
+                android:id="@+id/et_ObjName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -29,7 +29,7 @@
                 android:inputType="textPersonName" />
 
             <EditText
-                android:id="@+id/et_Description"
+                android:id="@+id/et_ObjDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -37,7 +37,7 @@
                 android:inputType="textPersonName" />
 
             <EditText
-                android:id="@+id/et_Effort"
+                android:id="@+id/et_ObjEffort"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -45,7 +45,7 @@
                 android:inputType="textPersonName" />
 
             <EditText
-                android:id="@+id/et_Duration"
+                android:id="@+id/et_ObjDuration"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
@@ -60,7 +60,7 @@
                 android:textAlignment="center" />
 
             <Spinner
-                android:id="@+id/sp_Frequency"
+                android:id="@+id/sp_ObjFrequency"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
@@ -72,9 +72,16 @@
                 android:textAlignment="center" />
 
             <Spinner
-                android:id="@+id/sp_TimeBlock"
+                android:id="@+id/sp_ObjTimeBlock"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClickSaveObjective"
+                android:text="Save" />
 
         </LinearLayout>
     </ScrollView>
