@@ -1,0 +1,35 @@
+<resources>
+    <string-array name="frequency_array">
+        <item>1 Day</item>
+        <item>2 Days</item>
+        <item>3 Days</item>
+        <item>4 Days</item>
+        <item>5 Days</item>
+        <item>6 Days</item>
+        <item>7 Days</item>
+    </string-array>
+
+    <string name="app_name">Flexi</string>
+
+    <string name="upcoming">Upcoming</string>
+    <string name="completed">Completed</string>
+
+    <string name="obj_name">Name</string>
+    <string name="obj_description">Description</string>
+    <string name="obj_effort">Effort</string>
+    <string name="obj_duration">Duration</string>
+    <string name="obj_frequency">Frequency</string>
+    <string name="obj_timeblock">Time Block</string>
+
+    <string name="block_name">Name</string>
+    <string name="block_description">Description</string>
+    <string name="block_starttime">Start Time</string>
+    <string name="block_endtime">End Time</string>
+
+    <string name="obj_card_name_example">Construct Additional Pylons</string>
+    <string name="obj_card_description_example">You must Construct Additional Pylons</string>
+    <string name="obj_card_effort_example">Easy</string>
+    <string name="obj_card_duration_example">1 Minute</string>
+    <string name="obj_card_frequency_example">Every 10 minutes</string>
+    <string name="obj_card_timeblock_example">All Day</string>
+</resources>
