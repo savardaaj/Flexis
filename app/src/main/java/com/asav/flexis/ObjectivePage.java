@@ -1,5 +1,6 @@
 package com.asav.flexis;
 
+import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -83,6 +84,9 @@ public class ObjectivePage extends AppCompatActivity {
         objective.timeblock = timeBlocksMap.get(sp_Frequency.getSelectedItem().toString());
 
         dbh.createObjective(objective);
+
+        Intent mainActivity = new Intent(this, MainActivity.class);
+        startActivity(mainActivity);
     }
 
 }

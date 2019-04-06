@@ -28,10 +28,10 @@ public class DatabaseHandler {
         db = FirebaseFirestore.getInstance();
     }
 
-    public void getObjectives() {
+    public void getObjectives(Context context) {
         Log.d("***DEBUG***", "inside getObjectives");
 
-        //final ObjectivePage OP = (ObjectivePage) context;
+        final MainActivity MA = (MainActivity) context;
         final Map<String, Objective> objectivesMap = new HashMap<>();
 
         db.collection("objectives")
@@ -43,8 +43,10 @@ public class DatabaseHandler {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d("***DEBUG***", document.getId() + " => " + document.getData());
                                 Objective obj = document.toObject(Objective.class);
+                                obj.isComplete = false;
                                 objectivesMap.put(obj.id, obj);
                             }
+                            MA.setObjectives(objectivesMap);
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }
@@ -112,7 +114,7 @@ public class DatabaseHandler {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d("***DEBUG***", document.getId() + " => " + document.getData());
                                 TimeBlock tb = document.toObject(TimeBlock.class);
-                                timeblocksMap.put(tb.id, tb);
+                                timeblocksMap.put(tb.name, tb);
                             }
                             OP.populateTimeBlocks(timeblocksMap);
                         } else {
@@ -134,7 +136,7 @@ public class DatabaseHandler {
         timeblock.put("endTime", tb.endTime);
 
         // Add a new document with a generated ID
-        db.collection("users")
+        db.collection("timeblocks")
                 .add(timeblock)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override

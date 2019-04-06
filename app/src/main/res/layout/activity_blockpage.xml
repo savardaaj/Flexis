@@ -37,28 +37,30 @@
                 android:hint="@string/block_description"
                 android:inputType="textPersonName" />
 
-            <EditText
-                android:id="@+id/et_BlockStartTime"
+            <TextView
+                android:id="@+id/tv_BlockStartTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/block_starttime"
-                android:inputType="time" />
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:text="Start Time"
+                android:textSize="18sp" />
 
-            <EditText
-                android:id="@+id/et_BlockEndTime"
+            <TextView
+                android:id="@+id/tv_BlockEndTime"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
-                android:hint="@string/block_endtime"
-                android:inputType="time" />
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:text="End Time"
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btn_saveTimeBlock"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="onClickSaveTimeBlock"
-                android:text="Button"
+                android:text="Save"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 tools:layout_editor_absoluteY="423dp" />

@@ -11,13 +11,13 @@
 
     <string name="app_name">Flexi</string>
 
-    <string name="upcoming">Upcoming</string>
+    <string name="today">Today -  </string>
     <string name="completed">Completed</string>
 
     <string name="obj_name">Name</string>
     <string name="obj_description">Description</string>
     <string name="obj_effort">Effort</string>
-    <string name="obj_duration">Duration</string>
+    <string name="obj_duration">Duration in minutes</string>
     <string name="obj_frequency">Frequency</string>
     <string name="obj_timeblock">Time Block</string>
 
@@ -29,7 +29,15 @@
     <string name="obj_card_name_example">Construct Additional Pylons</string>
     <string name="obj_card_description_example">You must Construct Additional Pylons</string>
     <string name="obj_card_effort_example">Easy</string>
-    <string name="obj_card_duration_example">1 Minute</string>
-    <string name="obj_card_frequency_example">Every 10 minutes</string>
-    <string name="obj_card_timeblock_example">All Day</string>
+    <string name="obj_card_duration_example">05:00</string>
+    <string name="obj_card_frequency_example">Reoccurs: Every 10 minutes</string>
+    <string name="obj_card_timeblock_example">Morning</string>
+
+    <string name="task_list">Task List</string>
+    <string name="timeblock_list">Timeblock List</string>
+
+    <string name="nav_header">Flexi</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 </resources>

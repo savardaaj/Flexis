@@ -1,12 +1,14 @@
 package com.asav.flexis;
 
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.TimePicker;
 
 import java.util.Calendar;
@@ -16,7 +18,8 @@ public class TimeBlockPage extends AppCompatActivity {
     DatabaseHandler dbh = new DatabaseHandler();
 
     ConstraintLayout cl;
-    EditText et_name, et_description, et_startTime, et_endTime;
+    EditText et_name, et_description;
+    TextView tv_BlockStartTime, tv_BlockEndTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,19 +33,19 @@ public class TimeBlockPage extends AppCompatActivity {
 
     }
 
-
-
     public void initializeLayout() {
+        Log.d("***DEBUG***", "inside initializeLayout");
+
         cl = findViewById(R.id.cl_blockPage);
         et_name = cl.findViewById(R.id.et_BlockName);
         et_description = cl.findViewById(R.id.et_BlockDescription);
-        et_startTime = cl.findViewById(R.id.et_BlockStartTime);
-        et_endTime = cl.findViewById(R.id.et_BlockEndTime);
+        tv_BlockStartTime = cl.findViewById(R.id.tv_BlockStartTime);
+        tv_BlockEndTime = cl.findViewById(R.id.tv_BlockEndTime);
     }
 
     public void setupTimePickers() {
         Log.d("***DEBUG***", "inside initializeTimePickers");
-        et_startTime.setOnClickListener(new View.OnClickListener() {
+        tv_BlockStartTime.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -51,10 +54,18 @@ public class TimeBlockPage extends AppCompatActivity {
                 int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
                 int minute = mcurrentTime.get(Calendar.MINUTE);
                 TimePickerDialog mTimePicker;
-                mTimePicker = new TimePickerDialog(getApplicationContext(), new TimePickerDialog.OnTimeSetListener() {
+                mTimePicker = new TimePickerDialog(TimeBlockPage.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        et_startTime.setText( selectedHour + ":" + selectedMinute);
+                        String time;
+
+                        if(selectedHour > 12) {
+                            time = String.format("%02d:%02d", (selectedHour - 12), selectedMinute) + " pm";
+                        }
+                        else {
+                            time = String.format("%02d:%02d", (selectedHour), selectedMinute) + " am";
+                        }
+                        tv_BlockStartTime.setText(time);
                     }
                 }, hour, minute, false);//No 24 hour time
                 mTimePicker.setTitle("Select Start Time");
@@ -63,7 +74,7 @@ public class TimeBlockPage extends AppCompatActivity {
             }
         });
 
-        et_endTime.setOnClickListener(new View.OnClickListener() {
+        tv_BlockEndTime.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
@@ -72,10 +83,24 @@ public class TimeBlockPage extends AppCompatActivity {
                 int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
                 int minute = mcurrentTime.get(Calendar.MINUTE);
                 TimePickerDialog mTimePicker;
-                mTimePicker = new TimePickerDialog(getApplicationContext(), new TimePickerDialog.OnTimeSetListener() {
+                mTimePicker = new TimePickerDialog(TimeBlockPage.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        et_endTime.setText( selectedHour + ":" + selectedMinute);
+                        String time;
+
+                        if(selectedHour > 12) {
+                            time = String.format("%02d:%02d", (selectedHour - 12), selectedMinute) + " pm";
+                        }
+                        else {
+                            if(selectedHour == 0) {
+                                time = String.format("%02d:%02d", 12, selectedMinute) + " am";
+                            }
+                            else {
+                                time = String.format("%02d:%02d", (selectedHour), selectedMinute) + " am";
+                            }
+
+                        }
+                        tv_BlockEndTime.setText(time);
                     }
                 }, hour, minute, false);//No 24 hour time
                 mTimePicker.setTitle("Select Start Time");
@@ -92,10 +117,13 @@ public class TimeBlockPage extends AppCompatActivity {
         timeblock.userId = "test123";
         timeblock.name = et_name.getText().toString();
         timeblock.description = et_description.getText().toString();
-        timeblock.startTime = et_startTime.getText().toString();
-        timeblock.endTime = et_endTime.getText().toString();
+        timeblock.startTime = tv_BlockStartTime.getText().toString();
+        timeblock.endTime = tv_BlockEndTime.getText().toString();
 
         dbh.createTimeBlock(timeblock);
+
+        Intent mainActivity = new Intent(this, MainActivity.class);
+        startActivity(mainActivity);
     }
 
 }
