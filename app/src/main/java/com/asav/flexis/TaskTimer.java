@@ -1,20 +1,10 @@
 package com.asav.flexis;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-import android.os.Handler;
 import android.os.SystemClock;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.TextView;
-
-import static android.content.ContentValues.TAG;
 
 public class TaskTimer {
 

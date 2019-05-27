@@ -1,35 +1,25 @@
 package com.asav.flexis;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-import android.support.constraint.ConstraintLayout;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.Task;
-import com.google.gson.internal.ObjectConstructor;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,8 +82,15 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             LayoutInflater inflater = LayoutInflater.from(this);
-            LinearLayout ll_upcoming = findViewById(R.id.ll_main_today);
-            ll_upcoming.removeAllViews();
+            LinearLayout ll_current = findViewById(R.id.ll_main_current);
+            ll_current.removeAllViews();
+
+            //add in the current time block text view
+            TextView tv_currentTimeBlock = new TextView(this);
+            tv_currentTimeBlock.setText("Current Time Block");
+            tv_currentTimeBlock.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+            tv_currentTimeBlock.setTextColor(Color.WHITE);
+            ll_current.addView(tv_currentTimeBlock);
 
             for(Objective obj : objectivesMap.values()) {
                 if (!obj.isComplete) {
@@ -134,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                     params.setMargins(0, 5, 0, 5);
                     objectiveCard.setLayoutParams(params);
 
-                    ll_upcoming.addView(objectiveCard);
+                    ll_current.addView(objectiveCard);
                     objectiveCard.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
                     //add card to view
 
@@ -150,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Error Occurred", Toast.LENGTH_SHORT).show();
         }
     }
+
+
 
     private View.OnClickListener onClickActionObjective = new View.OnClickListener() {
         @Override
