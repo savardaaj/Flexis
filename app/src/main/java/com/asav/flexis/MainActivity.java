@@ -17,6 +17,7 @@ import androidx.cardview.widget.CardView;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -27,6 +28,10 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
 
+    static final String APP_EDIT = "Edit";
+    static final String APP_CREATE = "Create";
+    static final String APP_DELETE = "Delete";
+    static final String APP_VIEW = "View";
 
     DatabaseHandler dbh = new DatabaseHandler();
     NotificationHandler notificationHandler;
@@ -82,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             LayoutInflater inflater = LayoutInflater.from(this);
-            LinearLayout ll_current = findViewById(R.id.ll_main_current);
+            LinearLayout ll_current = findViewById(R.id.ll_current);
             ll_current.removeAllViews();
 
             //add in the current time block text view
@@ -118,6 +123,8 @@ public class MainActivity extends AppCompatActivity {
                     String objDuration = parseDuration(Integer.parseInt(obj.duration));
                     objectiveDuration.setText(objDuration);
                     objectiveEffort.setText(obj.effort);
+                    objectiveCard.setOnClickListener(onClickEditObjective);
+
                     //objectiveFrequency.setText(obj.frequency);
                     //if(obj.timeblock != null) {
                     // objectiveTimeBlock.setText(obj.timeblock.name);
@@ -156,6 +163,42 @@ public class MainActivity extends AppCompatActivity {
             objectiveActionClicked(v);
         }
     };
+
+    private View.OnClickListener onClickEditObjective = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            editObjective(v);
+        }
+    };
+
+    private void editObjective(View v) {
+        Log.d("***Debug***", "inside editObjective");
+
+        Objective objective = null;
+
+        try {
+            //ViewGroup objectiveCard = (ViewGroup) v.getParent();
+
+            for (Objective obj : objectivesMap.values()) {
+                if (obj == v.getTag()) {
+
+                    Gson gson = new Gson();
+                    String objectiveJSON = gson.toJson(obj);
+                    Bundle extras = new Bundle();
+                    Intent editObjective = new Intent(this, ObjectivePage.class);
+                    editObjective.addCategory(APP_EDIT);
+                    //extras.putParcelable("user", user);
+                    extras.putString("details", objectiveJSON);
+                    editObjective.putExtras(extras);
+                    startActivity(editObjective);
+                }
+            }
+        } catch(Exception e) {
+            Log.d("***ERROR***", "objectiveActionClicked: " + e.getMessage());
+            Log.d("***ERROR***", "objectiveActionClicked: " + e);
+            Toast.makeText(this, "Error Occurred", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     public void objectiveActionClicked(View v) {
         Log.d("***Debug***", "inside objectiveActionClicked");

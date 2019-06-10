@@ -2,6 +2,8 @@ package com.asav.flexis;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -82,6 +84,37 @@ public class DatabaseHandler {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error adding document", e);
+                    }
+                });
+    }
+
+    public void updateObjective(Objective obj) {
+        Log.d("***DEBUG***", "inside createObjectives");
+
+        Map<String, Object> objective = new HashMap<>();
+        objective.put("userId", obj.userId);
+        objective.put("name", obj.name);
+        objective.put("description", obj.description);
+        objective.put("duration", obj.duration);
+        objective.put("effort", obj.effort);
+        objective.put("frequency", obj.frequency);
+        objective.put("timeblock", obj.timeblock);
+
+        // Update document with a generated ID
+        db.collection("objectives").document(obj.id)
+                .update(objective)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("***Debug***", "DocumentSnapshot successfully updated!");
+                        //Toast.makeText(context, "Updated " + wr.name, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("***Debug***", "Error updating document", e);
+                        //Toast.makeText(context, "Failed to update " + wr.name, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
