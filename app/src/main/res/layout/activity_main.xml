@@ -99,7 +99,7 @@
 
 
                 <TextView
-                    android:id="@+id/tv_CurrentTimeBlock"
+                    android:id="@+id/tv_currenttimeblock_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Current Time Block"
@@ -121,7 +121,7 @@
                 android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_NextTimeBlock"
+                android:id="@+id/tv_nexttimeblock_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Next Time Block Name"

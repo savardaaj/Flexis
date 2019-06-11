@@ -104,7 +104,7 @@ public class ObjectivePage extends AppCompatActivity {
         objective.effort = et_effort.getText().toString();
         objective.frequency = sp_Frequency.getSelectedItem().toString();
         //objective.timeblock = timeBlocksMap.get(sp_Frequency.getSelectedItem().toString()); saving cause changing below
-        objective.timeblock = timeBlocksMap.get(sp_TimeBlock.getSelectedItem().toString());
+        objective.timeblockId = timeBlocksMap.get(sp_TimeBlock.getSelectedItem().toString()).name;
 
         if(category.equals(APP_EDIT)) {
             objective.id = existingObj.id;

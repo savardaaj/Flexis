@@ -56,6 +56,34 @@ public class DatabaseHandler {
                 });
     }
 
+    public void getObjectivesForTimeBlock(Context context, TimeBlock timeBlock) {
+        Log.d("***DEBUG***", "inside getObjectives");
+
+        final MainActivity MA = (MainActivity) context;
+        final Map<String, Objective> objectivesMap = new HashMap<>();
+
+        db.collection("objectives").whereEqualTo("timeblockId", timeBlock.id)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("***DEBUG***", document.getId() + " => " + document.getData());
+                                Objective obj = document.toObject(Objective.class);
+                                obj.isComplete = false;
+                                objectivesMap.put(obj.id, obj);
+                            }
+                            MA.setObjectives(objectivesMap);
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+    }
+
+
+
     public void createObjective(Objective obj) {
         Log.d("***DEBUG***", "inside createObjectives");
 
@@ -67,7 +95,7 @@ public class DatabaseHandler {
         objective.put("duration", obj.duration);
         objective.put("effort", obj.effort);
         objective.put("frequency", obj.frequency);
-        objective.put("timeblock", obj.timeblock);
+        objective.put("timeblockId", obj.timeblockId);
 
 
         // Add a new document with a generated ID
@@ -98,7 +126,7 @@ public class DatabaseHandler {
         objective.put("duration", obj.duration);
         objective.put("effort", obj.effort);
         objective.put("frequency", obj.frequency);
-        objective.put("timeblock", obj.timeblock);
+        objective.put("timeblockId", obj.timeblockId);
 
         // Update document with a generated ID
         db.collection("objectives").document(obj.id)
@@ -150,6 +178,34 @@ public class DatabaseHandler {
                                 timeblocksMap.put(tb.name, tb);
                             }
                             OP.populateTimeBlocks(timeblocksMap);
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+    }
+
+    public void getCurrentTimeBlock(Context context) {
+        Log.d("***DEBUG***", "inside getTimeBlocks");
+
+        final MainActivity MA = (MainActivity) context;
+        final TimeBlock currentTimeBlock = new TimeBlock();
+
+        db.collection("timeblocks").whereEqualTo("name", "Night")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            TimeBlock tb = null;
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("***DEBUG***", document.getId() + " => " + document.getData());
+                                tb = document.toObject(TimeBlock.class);
+                            }
+                            if(tb != null) {
+                                MA.setCurrentTimeBlock(tb);
+                            }
+
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }

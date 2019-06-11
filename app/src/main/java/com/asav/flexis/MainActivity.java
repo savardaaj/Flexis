@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity {
     DatabaseHandler dbh = new DatabaseHandler();
     NotificationHandler notificationHandler;
 
+    TimeBlock currentTimeBlock = null;
+
     Map<String, Objective> objectivesMap = new HashMap<>();
     Map<View, Objective> objectivesViewMap = new HashMap<>();
     Map<Objective, TaskTimer> timerMap = new HashMap<>();
@@ -56,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
         initializeLayout();
         //initializeNavigationView();
 
-        dbh.getObjectives(this);
+        dbh.getCurrentTimeBlock(this);
+
     }
 
     public void initializeLayout() {
@@ -92,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
             //add in the current time block text view
             TextView tv_currentTimeBlock = new TextView(this);
-            tv_currentTimeBlock.setText("Current Time Block");
+            tv_currentTimeBlock.setText(currentTimeBlock.name);
             tv_currentTimeBlock.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
             tv_currentTimeBlock.setTextColor(Color.WHITE);
             ll_current.addView(tv_currentTimeBlock);
@@ -294,6 +297,12 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                 });
+    }
+
+    public void setCurrentTimeBlock(TimeBlock tb) {
+        this.currentTimeBlock = tb;
+
+        dbh.getObjectivesForTimeBlock(this, currentTimeBlock);
     }
 
 
