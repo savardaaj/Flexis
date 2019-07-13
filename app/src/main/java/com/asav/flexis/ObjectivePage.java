@@ -78,7 +78,7 @@ public class ObjectivePage extends AppCompatActivity {
     private void initializeLayout() {
         Log.d("***DEBUG***", "inside initializeLayout");
 
-        dbh.getTimeBlocks(this);
+        dbh.getTimeBlocksForObjectivePage(this);
 
         cl = findViewById(R.id.cl_objectivePage);
         et_name = cl.findViewById(R.id.et_ObjName);
@@ -103,8 +103,8 @@ public class ObjectivePage extends AppCompatActivity {
         objective.duration = et_duration.getText().toString();
         objective.effort = et_effort.getText().toString();
         objective.frequency = sp_Frequency.getSelectedItem().toString();
-        //objective.timeblock = timeBlocksMap.get(sp_Frequency.getSelectedItem().toString()); saving cause changing below
-        objective.timeblockId = timeBlocksMap.get(sp_TimeBlock.getSelectedItem().toString()).name;
+        objective.timeblock = timeBlocksMap.get(sp_TimeBlock.getSelectedItem().toString());
+        objective.timeblockId = timeBlocksMap.get(sp_TimeBlock.getSelectedItem().toString()).id;
 
         if(category.equals(APP_EDIT)) {
             objective.id = existingObj.id;

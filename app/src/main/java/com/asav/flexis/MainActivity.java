@@ -20,8 +20,10 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,7 +40,9 @@ public class MainActivity extends AppCompatActivity {
 
     TimeBlock currentTimeBlock = null;
 
+    Map<String, List<Objective>> timeblockObjectivesMap = new HashMap<>();
     Map<String, Objective> objectivesMap = new HashMap<>();
+    Map<String, TimeBlock> timeblocksMap = new HashMap<>();
     Map<View, Objective> objectivesViewMap = new HashMap<>();
     Map<Objective, TaskTimer> timerMap = new HashMap<>();
 
@@ -58,7 +62,8 @@ public class MainActivity extends AppCompatActivity {
         initializeLayout();
         //initializeNavigationView();
 
-        dbh.getCurrentTimeBlock(this);
+        //get each time block and all objectives, draws to screen
+        dbh.getTimeBlocksForMainActivity(this);
 
     }
 
@@ -90,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             LayoutInflater inflater = LayoutInflater.from(this);
-            LinearLayout ll_current = findViewById(R.id.ll_current);
+            LinearLayout ll_current = findViewById(R.id.ll_card_container);
             ll_current.removeAllViews();
 
             //add in the current time block text view
@@ -141,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                     params.setMargins(0, 5, 0, 5);
                     objectiveCard.setLayoutParams(params);
 
+
                     ll_current.addView(objectiveCard);
                     objectiveCard.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
                     //add card to view
@@ -154,6 +160,92 @@ public class MainActivity extends AppCompatActivity {
         } catch(Exception e) {
             Log.d("***ERROR***", "populateTodaysTasks: " + e.getMessage());
             Log.d("***ERROR***", "populateTodaysTasks: " + e);
+            Toast.makeText(this, "Error Occurred", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void initializeTimeBlockObjectives() {
+
+
+        populateTimeBlockObjectives(timeblockObjectivesMap);
+    }
+
+    public void populateTimeBlockObjectives(Map<String, List<Objective>> timeblockObjsMap) {
+        Log.d("***Debug***", "inside populateTimeBlockObjectives");
+
+        LayoutInflater inflater = LayoutInflater.from(this);
+        LinearLayout ll_card_container = findViewById(R.id.ll_card_container);
+        ll_card_container.removeAllViews();
+
+
+        try {
+
+            for(String tbId : timeblockObjsMap.keySet()) {
+                if (timeblockObjsMap.get(tbId).size() > 0) {
+                    TextView tv_timeblock_name = new TextView(this);
+                    TimeBlock currentTB = timeblocksMap.get(tbId);
+                    tv_timeblock_name.setText(currentTB.name);
+                    tv_timeblock_name.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                    tv_timeblock_name.setTextColor(Color.WHITE);
+
+                    ll_card_container.addView(tv_timeblock_name);
+
+                    for (Objective obj : timeblockObjsMap.get(currentTB.id)) {
+
+                        if (!obj.isComplete) {
+                            //setup layout stuff
+
+                            final View objectiveCard = inflater.inflate(R.layout.objective_card_component, null, false);
+                            objectiveCard.setPadding(0, 0, 0, 10);
+                            objectiveCard.setTag(obj);
+
+                            CardView cvActionObjective = objectiveCard.findViewById(R.id.cv_card_action);
+                            cvActionObjective.setOnClickListener(onClickActionObjective);
+
+                            //initialize the layout fields
+                            TextView objectiveName = objectiveCard.findViewById(R.id.tv_objCard_Name);
+                            //TextView objectiveDescription =  objectiveCard.findViewById(R.id.);
+                            TextView objectiveDuration = objectiveCard.findViewById(R.id.tv_objCard_Duration);
+                            TextView objectiveEffort = objectiveCard.findViewById(R.id.tv_objCard_Effort);
+                            //TextView objectiveFrequency =  objectiveCard.findViewById(R.id.tv_objCard_Frequency);
+                            //TextView objectiveTimeBlock =  objectiveCard.findViewById(R.id.tv_objCard_TimeBlock);
+
+                            //set values of imported components
+                            objectiveName.setText(obj.name);
+                            //objectiveDescription.setText(obj.description);
+                            String objDuration = parseDuration(Integer.parseInt(obj.duration));
+                            objectiveDuration.setText(objDuration);
+                            objectiveEffort.setText(obj.effort);
+                            objectiveCard.setOnClickListener(onClickEditObjective);
+
+                            //objectiveFrequency.setText(obj.frequency);
+                            //if(obj.timeblock != null) {
+                            // objectiveTimeBlock.setText(obj.timeblock.name);
+                            //}
+
+                            //Add margins to card for spacing, height, width
+                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.MATCH_PARENT
+                            );
+                            params.setMargins(0, 5, 0, 5);
+                            objectiveCard.setLayoutParams(params);
+                            ll_card_container.addView(objectiveCard);
+
+                            objectiveCard.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
+                            //add card to view
+
+                            TaskTimer timer = new TaskTimer(this, objectiveCard, Integer.parseInt(obj.duration));
+
+                            timerMap.put(obj, timer);
+                            objectivesViewMap.put(objectiveCard, obj);
+                        }
+                    }
+                }
+            }
+        } catch(Exception e) {
+            Log.d("***ERROR***", "populateTimeBlockObjectives: " + e.getMessage());
+            Log.d("***ERROR***", "populateTimeBlockObjectives: " + e);
             Toast.makeText(this, "Error Occurred", Toast.LENGTH_SHORT).show();
         }
     }
@@ -176,8 +268,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void editObjective(View v) {
         Log.d("***Debug***", "inside editObjective");
-
-        Objective objective = null;
 
         try {
             //ViewGroup objectiveCard = (ViewGroup) v.getParent();
@@ -255,15 +345,11 @@ public class MainActivity extends AppCompatActivity {
 
         //prompt user to select next task to begin
         //redraw list of objectives
-        populateTodaysTasks(objectivesMap);
+        //populateTodaysTasks(objectivesMap);
+        populateTimeBlockObjectives(timeblockObjectivesMap);
     }
 
-    public void setObjectives(Map<String, Objective> objectivesMap) {
-        Log.d("***Debug***", "inside setObjectives");
 
-        this.objectivesMap = objectivesMap;
-        populateTodaysTasks(this.objectivesMap);
-    }
 
     private String parseDuration(int duration) {
         Log.d("***Debug***", "inside parseDuration");
@@ -299,11 +385,42 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    public void setTimeBlockObjectivesMap(Map<String, TimeBlock> tbm, Map<String, Objective> objm) {
+        Log.d("***Debug***", "inside setTimeBlockObjectivesMap");
+
+        for(Objective obj : objm.values()) {
+            if (obj.timeblockId != null) {
+                if (!timeblockObjectivesMap.containsKey(obj.timeblockId)) {
+                    timeblockObjectivesMap.put(obj.timeblockId, new ArrayList<Objective>());
+                }
+                timeblockObjectivesMap.get(obj.timeblockId).add(obj);
+            }
+        }
+    }
+
+
     public void setCurrentTimeBlock(TimeBlock tb) {
+        Log.d("***DEBUG***", "inside MA.CurrentTimeBlock");
         this.currentTimeBlock = tb;
 
         dbh.getObjectivesForTimeBlock(this, currentTimeBlock);
     }
 
+    public void setTimeBlocksMap(Map<String, TimeBlock> timeblocksMap) {
+        Log.d("***DEBUG***", "inside MA.setTimeBlocksMap");
+        this.timeblocksMap = timeblocksMap;
+
+        dbh.getObjectivesForMainActivity(this);
+    }
+
+    public void setObjectivesMap(Map<String, Objective> objectivesMap) {
+        Log.d("***Debug***", "inside setObjectivesMap");
+
+        this.objectivesMap = objectivesMap;
+
+        setTimeBlockObjectivesMap(timeblocksMap, objectivesMap);
+        initializeTimeBlockObjectives();
+
+    }
 
 }

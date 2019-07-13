@@ -90,7 +90,7 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/ll_current"
+                android:id="@+id/ll_card_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/colorPrimaryDark"
@@ -99,7 +99,7 @@
 
 
                 <TextView
-                    android:id="@+id/tv_currenttimeblock_name"
+                    android:id="@+id/tv_timeblock_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Current Time Block"
@@ -114,27 +114,6 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/ll_next"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tv_nexttimeblock_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Next Time Block Name"
-                android:textAlignment="center"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp" />
-
-            <include
-                layout="@layout/objective_card_component"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            </LinearLayout>
         </LinearLayout>
     </ScrollView>
 

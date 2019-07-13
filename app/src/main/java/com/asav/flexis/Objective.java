@@ -13,6 +13,7 @@ public class Objective {
     public String frequency;
     public String status;
     public LocalDateTime dateCompleted;
+    public TimeBlock timeblock;
     public String timeblockId;
     public boolean isComplete;
 

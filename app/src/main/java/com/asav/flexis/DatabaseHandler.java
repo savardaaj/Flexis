@@ -2,7 +2,6 @@ package com.asav.flexis;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -30,8 +29,8 @@ public class DatabaseHandler {
         db = FirebaseFirestore.getInstance();
     }
 
-    public void getObjectives(Context context) {
-        Log.d("***DEBUG***", "inside getObjectives");
+    public void getObjectivesForMainActivity(Context context) {
+        Log.d("***DEBUG***", "inside getObjectivesForMainActivity");
 
         final MainActivity MA = (MainActivity) context;
         final Map<String, Objective> objectivesMap = new HashMap<>();
@@ -48,7 +47,7 @@ public class DatabaseHandler {
                                 obj.isComplete = false;
                                 objectivesMap.put(obj.id, obj);
                             }
-                            MA.setObjectives(objectivesMap);
+                            MA.setObjectivesMap(objectivesMap);
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }
@@ -57,7 +56,7 @@ public class DatabaseHandler {
     }
 
     public void getObjectivesForTimeBlock(Context context, TimeBlock timeBlock) {
-        Log.d("***DEBUG***", "inside getObjectives");
+        Log.d("***DEBUG***", "inside getObjectivesForTimeBlock");
 
         final MainActivity MA = (MainActivity) context;
         final Map<String, Objective> objectivesMap = new HashMap<>();
@@ -74,7 +73,7 @@ public class DatabaseHandler {
                                 obj.isComplete = false;
                                 objectivesMap.put(obj.id, obj);
                             }
-                            MA.setObjectives(objectivesMap);
+                            MA.setObjectivesMap(objectivesMap);
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }
@@ -95,6 +94,7 @@ public class DatabaseHandler {
         objective.put("duration", obj.duration);
         objective.put("effort", obj.effort);
         objective.put("frequency", obj.frequency);
+        objective.put("timeblock", obj.timeblock);
         objective.put("timeblockId", obj.timeblockId);
 
 
@@ -126,6 +126,7 @@ public class DatabaseHandler {
         objective.put("duration", obj.duration);
         objective.put("effort", obj.effort);
         objective.put("frequency", obj.frequency);
+        objective.put("timeblock", obj.timeblock);
         objective.put("timeblockId", obj.timeblockId);
 
         // Update document with a generated ID
@@ -160,8 +161,8 @@ public class DatabaseHandler {
             .update(update);
     }
 
-    public void getTimeBlocks(Context context) {
-        Log.d("***DEBUG***", "inside getTimeBlocks");
+    public void getTimeBlocksForObjectivePage(Context context) {
+        Log.d("***DEBUG***", "inside getTimeBlocksForObjectivePage");
 
         final ObjectivePage OP = (ObjectivePage) context;
         final Map<String, TimeBlock> timeblocksMap = new HashMap<>();
@@ -185,11 +186,35 @@ public class DatabaseHandler {
                 });
     }
 
-    public void getCurrentTimeBlock(Context context) {
-        Log.d("***DEBUG***", "inside getTimeBlocks");
+    public void getTimeBlocksForMainActivity(Context context) {
+        Log.d("***DEBUG***", "inside getTimeBlocksForMainActivity");
 
         final MainActivity MA = (MainActivity) context;
-        final TimeBlock currentTimeBlock = new TimeBlock();
+        final Map<String, TimeBlock> timeblocksMap = new HashMap<>();
+
+        db.collection("timeblocks")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("***DEBUG***", document.getId() + " => " + document.getData());
+                                TimeBlock tb = document.toObject(TimeBlock.class);
+                                timeblocksMap.put(tb.id, tb);
+                            }
+                            MA.setTimeBlocksMap(timeblocksMap);
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+    }
+
+    public void getCurrentTimeBlock(Context context) {
+        Log.d("***DEBUG***", "inside getTimeBlocksForObjectivePage");
+
+        final MainActivity MA = (MainActivity) context;
 
         db.collection("timeblocks").whereEqualTo("name", "Night")
                 .get()
