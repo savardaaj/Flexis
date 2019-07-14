@@ -77,6 +77,7 @@ public class TimeBlockPage extends AppCompatActivity {
 
     public void setupTimePickers() {
         Log.d("***DEBUG***", "inside initializeTimePickers");
+
         tv_BlockStartTime.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -89,9 +90,15 @@ public class TimeBlockPage extends AppCompatActivity {
                     minute = mcurrentTime.get(Calendar.MINUTE);
                 }
                 else {
-                    hour = Integer.parseInt(existingTimeBlock.startTime.substring(0, 1));
-                    minute = Integer.parseInt(existingTimeBlock.startTime.substring(3, 4));
+                    hour = Integer.parseInt(existingTimeBlock.startTime.substring(0, 2));
+                    minute = Integer.parseInt(existingTimeBlock.startTime.substring(3, 5));
+
+                    if(existingTimeBlock.startTime.substring(6, 8).equals("pm")) {
+                        hour += 12;
+                    }
                 }
+
+
 
                 TimePickerDialog mTimePicker;
                 mTimePicker = new TimePickerDialog(TimeBlockPage.this, new TimePickerDialog.OnTimeSetListener() {
@@ -126,9 +133,14 @@ public class TimeBlockPage extends AppCompatActivity {
                     minute = mcurrentTime.get(Calendar.MINUTE);
                 }
                 else {
-                    hour = Integer.parseInt(existingTimeBlock.endTime.substring(0, 1));
-                    minute = Integer.parseInt(existingTimeBlock.endTime.substring(3, 4));
+                    hour = Integer.parseInt(existingTimeBlock.endTime.substring(0, 2));
+                    minute = Integer.parseInt(existingTimeBlock.endTime.substring(3, 5));
+
+                    if(existingTimeBlock.startTime.substring(6, 8).equals("pm")) {
+                        hour += 12;
+                    }
                 }
+
                 TimePickerDialog mTimePicker;
                 mTimePicker = new TimePickerDialog(TimeBlockPage.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
