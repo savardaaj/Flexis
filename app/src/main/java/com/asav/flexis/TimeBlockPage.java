@@ -6,21 +6,35 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.gson.Gson;
+
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Set;
+
+import static com.asav.flexis.MainActivity.APP_EDIT;
 
 public class TimeBlockPage extends AppCompatActivity {
 
     DatabaseHandler dbh = new DatabaseHandler();
 
+    TimeBlock existingTimeBlock = null;
+
     ConstraintLayout cl;
     EditText et_name, et_description;
+
+    String category = "";
+
     TextView tv_BlockStartTime, tv_BlockEndTime;
+
+    TimeBlock timeblock = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +45,23 @@ public class TimeBlockPage extends AppCompatActivity {
         initializeLayout();
         setupTimePickers();
 
+        Set<String> categories = getIntent().getCategories();
+        getIntent().getExtras();
+
+        Intent intent = getIntent();
+        if(intent != null) {
+            Bundle extras = intent.getExtras();
+            if(extras != null) {
+                //user = extras.getParcelable("user");
+                String JSON = extras.getString("details");
+                 timeblock = new Gson().fromJson(JSON, TimeBlock.class);
+                if(categories != null && categories.contains(APP_EDIT)) {
+                    category = APP_EDIT;
+                    existingTimeBlock = timeblock;
+                    populateFields(existingTimeBlock);
+                }
+            }
+        }
 
     }
 
@@ -52,8 +83,16 @@ public class TimeBlockPage extends AppCompatActivity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 Calendar mcurrentTime = Calendar.getInstance();
-                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-                int minute = mcurrentTime.get(Calendar.MINUTE);
+                int hour, minute;
+                if(existingTimeBlock == null) {
+                    hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                    minute = mcurrentTime.get(Calendar.MINUTE);
+                }
+                else {
+                    hour = Integer.parseInt(existingTimeBlock.startTime.substring(0, 1));
+                    minute = Integer.parseInt(existingTimeBlock.startTime.substring(3, 4));
+                }
+
                 TimePickerDialog mTimePicker;
                 mTimePicker = new TimePickerDialog(TimeBlockPage.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
@@ -68,7 +107,7 @@ public class TimeBlockPage extends AppCompatActivity {
                         }
                         tv_BlockStartTime.setText(time);
                     }
-                }, hour, minute, false);//No 24 hour time
+                }, hour, minute, false); //No 24 hour time
                 mTimePicker.setTitle("Select Start Time");
                 mTimePicker.show();
 
@@ -81,8 +120,15 @@ public class TimeBlockPage extends AppCompatActivity {
             public void onClick(View v) {
                 // TODO Auto-generated method stub
                 Calendar mcurrentTime = Calendar.getInstance();
-                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-                int minute = mcurrentTime.get(Calendar.MINUTE);
+                int hour, minute;
+                if(existingTimeBlock == null) {
+                    hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                    minute = mcurrentTime.get(Calendar.MINUTE);
+                }
+                else {
+                    hour = Integer.parseInt(existingTimeBlock.endTime.substring(0, 1));
+                    minute = Integer.parseInt(existingTimeBlock.endTime.substring(3, 4));
+                }
                 TimePickerDialog mTimePicker;
                 mTimePicker = new TimePickerDialog(TimeBlockPage.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
@@ -109,6 +155,17 @@ public class TimeBlockPage extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void populateFields(TimeBlock timeblock) {
+        Log.d("***DEBUG***", "inside populateFields");
+
+        et_name.setText(timeblock.name);
+        et_description.setText(timeblock.description);
+        //start and end times
+        tv_BlockStartTime.setText(timeblock.startTime);
+        tv_BlockEndTime.setText(timeblock.endTime);
+
     }
 
     public void onClickSaveTimeBlock(View v) {

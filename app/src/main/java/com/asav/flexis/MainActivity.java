@@ -8,10 +8,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -84,8 +82,34 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickNewTimeBlock(View v) {
         Log.d("***DEBUG***", "inside onClickNewTimeBlock");
-        Intent openNewTimeBLock = new Intent(this, TimeBlockPage.class);
-        startActivity(openNewTimeBLock);
+        Intent openNewTimeBlock = new Intent(this, TimeBlockPage.class);
+        startActivity(openNewTimeBlock);
+    }
+
+    public void onClickEditTimeBlock(View v) {
+        Log.d("***Debug***", "inside onClickEditTimeBlock");
+
+        try {
+            for (TimeBlock obj : timeblocksMap.values()) {
+                if (obj.id == v.getTag()) {
+
+                    Gson gson = new Gson();
+                    String timeblockJSON = gson.toJson(obj);
+                    Bundle extras = new Bundle();
+                    Intent editTimeBlock = new Intent(this, TimeBlockPage.class);
+                    editTimeBlock.addCategory(APP_EDIT);
+                    //extras.putParcelable("user", user);
+                    extras.putString("details", timeblockJSON);
+                    editTimeBlock.putExtras(extras);
+                    editTimeBlock.addCategory(APP_EDIT);
+                    startActivity(editTimeBlock);
+                }
+            }
+        } catch(Exception e) {
+            Log.d("***ERROR***", "objectiveActionClicked: " + e.getMessage());
+            Log.d("***ERROR***", "objectiveActionClicked: " + e);
+            Toast.makeText(this, "Error Occurred", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void onClickNewObjective(View v) {
@@ -104,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
         openNewObjective.putExtra("TimeblockName", name);
         startActivity(openNewObjective);
     }
-
 
 
     public void populateTodaysTasks(Map<String, Objective> objectivesMap) {
@@ -182,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initializeTimeBlockObjectives() {
-
+        Log.d("***Debug***", "inside initializeTimeBlockObjectives");
 
         populateTimeBlockObjectives(timeblockObjectivesMap);
     }
@@ -197,18 +220,23 @@ public class MainActivity extends AppCompatActivity {
         newGroup.setOrientation(LinearLayout.VERTICAL);
         ll_group_wrapper.addView(newGroup);
 
-
         try {
 
             for(String tbId : timeblockObjsMap.keySet()) {
-                if (timeblockObjsMap.get(tbId).size() > 0) {
+                if (timeblockObjsMap.get(tbId).size() > 0) { //get objectives for time block
                     View v = inflater.inflate(R.layout.timeblock_header, null);
                     ConstraintLayout clTimeblockHeader = v.findViewById(R.id.cl_timeblock_header);
                     TextView tv_timeblock_name = clTimeblockHeader.findViewById(R.id.tv_timeblock_name);
+                    TextView tv_timeblock_timerange = clTimeblockHeader.findViewById(R.id.tv_timeblock_timerange);
                     ImageView iv_addTask = clTimeblockHeader.findViewById(R.id.iv_add_objective);
                     iv_addTask.setOnClickListener(onClickAddObjective);
                     TimeBlock currentTB = timeblocksMap.get(tbId);
+                    tv_timeblock_name.setTag(currentTB.id);
                     tv_timeblock_name.setText(currentTB.name);
+                    tv_timeblock_name.setOnClickListener(onClickEditTimeBlock);
+
+                    String timeRange = currentTB.startTime + " - " + currentTB.endTime;
+                    tv_timeblock_timerange.setText(timeRange);
 
                     newGroup.addView(clTimeblockHeader);
 
@@ -230,7 +258,6 @@ public class MainActivity extends AppCompatActivity {
                             TextView objectiveDuration = objectiveCard.findViewById(R.id.tv_objCard_Duration);
                             TextView objectiveEffort = objectiveCard.findViewById(R.id.tv_objCard_Effort);
                             //TextView objectiveFrequency =  objectiveCard.findViewById(R.id.tv_objCard_Frequency);
-                            //TextView objectiveTimeBlock =  objectiveCard.findViewById(R.id.tv_objCard_TimeBlock);
 
                             //set values of imported components
                             objectiveName.setText(obj.name);
@@ -248,9 +275,6 @@ public class MainActivity extends AppCompatActivity {
                             objectiveCard.setOnClickListener(onClickEditObjective);
 
                             //objectiveFrequency.setText(obj.frequency);
-                            //if(obj.timeblock != null) {
-                            // objectiveTimeBlock.setText(obj.timeblock.name);
-                            //}
 
                             //Add margins to card for spacing, height, width
                             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -262,9 +286,6 @@ public class MainActivity extends AppCompatActivity {
                             newGroup.addView(objectiveCard);
 
                             objectiveCard.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
-                            //add card to view
-
-
                             objectivesViewMap.put(objectiveCard, obj);
                         }
                     }
@@ -377,8 +398,6 @@ public class MainActivity extends AppCompatActivity {
         populateTimeBlockObjectives(timeblockObjectivesMap);
     }
 
-
-
     private String parseDuration(int duration) {
         Log.d("***Debug***", "inside parseDuration");
 
@@ -455,6 +474,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             onClickNewObjectiveFromTimeblock(v);
+        }
+    };
+
+    private View.OnClickListener onClickEditTimeBlock = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            onClickEditTimeBlock(v);
         }
     };
 

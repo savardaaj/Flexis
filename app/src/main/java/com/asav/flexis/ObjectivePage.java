@@ -23,6 +23,8 @@ import static org.xmlpull.v1.XmlPullParser.TYPES;
 
 public class ObjectivePage extends AppCompatActivity {
 
+    String[] freqArray = {"1 Day", "2 Days", "3 Days", "4 Days", "5 Days", "6 Days", "7 Days"};
+
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     DatabaseHandler dbh = new DatabaseHandler();
 
@@ -59,7 +61,6 @@ public class ObjectivePage extends AppCompatActivity {
                 //user = extras.getParcelable("user");
                 String JSON = extras.getString("details");
                 timeblockName = extras.getString("TimeblockName");
-                Log.d("***DEBUG***", "GET IT onCreate ObjectivePage" + timeblockName);
                 objective = new Gson().fromJson(JSON, Objective.class);
                 if(categories != null && categories.contains(APP_EDIT)) {
                     category = APP_EDIT;
@@ -78,8 +79,6 @@ public class ObjectivePage extends AppCompatActivity {
         ArrayAdapter<String> timeBlockAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_item, this.timeblockList);
         timeBlockAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_TimeBlock.setAdapter(timeBlockAdapter);
-
-        Log.d("***DEBUG***", "inside timeblockname: " + timeblockName);
 
         if(existingObj != null) {
             populateValues();
@@ -140,8 +139,8 @@ public class ObjectivePage extends AppCompatActivity {
         et_description.setText(existingObj.description);
         et_duration.setText(existingObj.duration);
         et_effort.setText(existingObj.effort);
-        //sp_Frequency.setSelection(existingObj.frequency.);
         sp_TimeBlock.setSelection(Arrays.asList(timeblockList).indexOf(timeBlocksMap.get(existingObj.timeblock.name).name));
+        sp_Frequency.setSelection(Arrays.asList(freqArray).indexOf(existingObj.frequency));
     }
 
     private void setDefaultTimeBlock() {
