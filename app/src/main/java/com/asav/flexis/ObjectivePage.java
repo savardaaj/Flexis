@@ -14,10 +14,12 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
 import static com.asav.flexis.MainActivity.APP_EDIT;
+import static org.xmlpull.v1.XmlPullParser.TYPES;
 
 public class ObjectivePage extends AppCompatActivity {
 
@@ -25,6 +27,7 @@ public class ObjectivePage extends AppCompatActivity {
     DatabaseHandler dbh = new DatabaseHandler();
 
     Map<String, TimeBlock> timeBlocksMap;
+    String[] timeblockList;
 
     ConstraintLayout cl;
     EditText et_name, et_description, et_duration, et_effort;
@@ -32,6 +35,7 @@ public class ObjectivePage extends AppCompatActivity {
     Spinner sp_TimeBlock;
 
     String category = "";
+    String timeblockName = null;
 
     Objective existingObj = null;
 
@@ -54,11 +58,12 @@ public class ObjectivePage extends AppCompatActivity {
             if(extras != null) {
                 //user = extras.getParcelable("user");
                 String JSON = extras.getString("details");
+                timeblockName = extras.getString("TimeblockName");
+                Log.d("***DEBUG***", "GET IT onCreate ObjectivePage" + timeblockName);
                 objective = new Gson().fromJson(JSON, Objective.class);
-                if(categories.contains(APP_EDIT)) {
+                if(categories != null && categories.contains(APP_EDIT)) {
                     category = APP_EDIT;
                     existingObj = objective;
-                    populateValues();
                 }
             }
         }
@@ -67,12 +72,21 @@ public class ObjectivePage extends AppCompatActivity {
     public void populateTimeBlocks(Map<String, TimeBlock> timeblocksMap) {
         Log.d("***DEBUG***", "inside populateTImeBlocks");
         this.timeBlocksMap = timeblocksMap;
-        String[] blockList = timeblocksMap.keySet().toArray(new String[timeblocksMap.keySet().size()]);
+        this.timeblockList = timeblocksMap.keySet().toArray(new String[timeblocksMap.keySet().size()]);
 
         sp_TimeBlock = findViewById(R.id.sp_ObjTimeBlock);
-        ArrayAdapter<String> timeBlockAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_item, blockList);
+        ArrayAdapter<String> timeBlockAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_item, this.timeblockList);
         timeBlockAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         sp_TimeBlock.setAdapter(timeBlockAdapter);
+
+        Log.d("***DEBUG***", "inside timeblockname: " + timeblockName);
+
+        if(existingObj != null) {
+            populateValues();
+        }
+        else if(timeblockName != null) {
+            setDefaultTimeBlock();
+        }
     }
 
     private void initializeLayout() {
@@ -127,7 +141,12 @@ public class ObjectivePage extends AppCompatActivity {
         et_duration.setText(existingObj.duration);
         et_effort.setText(existingObj.effort);
         //sp_Frequency.setSelection(existingObj.frequency.);
-        //sp_TimeBlock.setSelection(timeBlocksMap.get(existingObj.timeblock));
+        sp_TimeBlock.setSelection(Arrays.asList(timeblockList).indexOf(timeBlocksMap.get(existingObj.timeblock.name).name));
+    }
+
+    private void setDefaultTimeBlock() {
+        Log.d("***DEBUG***", "inside setDefaultTimeBlock");
+        sp_TimeBlock.setSelection(Arrays.asList(timeblockList).indexOf(timeBlocksMap.get(timeblockName).name));
     }
 
 }

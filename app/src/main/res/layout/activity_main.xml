@@ -85,6 +85,7 @@
         app:layout_constraintTop_toBottomOf="@+id/btn_main_add_timeblock">
 
         <LinearLayout
+            android:id="@+id/ll_group_wrapper"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -95,24 +96,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/colorPrimaryDark"
                 android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@+id/tv_main_today">
-
-
-                <TextView
-                    android:id="@+id/tv_timeblock_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Current Time Block"
-                    android:textAlignment="center"
-                    android:textColor="#FFFFFF"
-                    android:textSize="18sp" />
-
-                <include
-                    layout="@layout/objective_card_component"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
+                app:layout_constraintTop_toBottomOf="@+id/tv_main_today"/>
 
         </LinearLayout>
     </ScrollView>
