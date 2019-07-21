@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -35,9 +36,10 @@ public class ObjectivePage extends AppCompatActivity {
     EditText et_name, et_description, et_duration, et_effort;
     Spinner sp_Frequency;
     Spinner sp_TimeBlock;
+    Button deleteObjective;
 
     String category = "";
-    String timeblockName = null;
+    String timeblockId = null;
 
     Objective existingObj = null;
 
@@ -60,7 +62,7 @@ public class ObjectivePage extends AppCompatActivity {
             if(extras != null) {
                 //user = extras.getParcelable("user");
                 String JSON = extras.getString("details");
-                timeblockName = extras.getString("TimeblockName");
+                timeblockId = extras.getString("TimeblockId");
                 objective = new Gson().fromJson(JSON, Objective.class);
                 if(categories != null && categories.contains(APP_EDIT)) {
                     category = APP_EDIT;
@@ -73,6 +75,8 @@ public class ObjectivePage extends AppCompatActivity {
     public void populateTimeBlocks(Map<String, TimeBlock> timeblocksMap) {
         Log.d("***DEBUG***", "inside populateTImeBlocks");
         this.timeBlocksMap = timeblocksMap;
+
+        //TODO, iterate over loop, get all names.
         this.timeblockList = timeblocksMap.keySet().toArray(new String[timeblocksMap.keySet().size()]);
 
         sp_TimeBlock = findViewById(R.id.sp_ObjTimeBlock);
@@ -83,13 +87,13 @@ public class ObjectivePage extends AppCompatActivity {
         if(existingObj != null) {
             populateValues();
         }
-        else if(timeblockName != null) {
+        else if(timeblockId != null) {
             setDefaultTimeBlock();
         }
     }
 
     private void initializeLayout() {
-        Log.d("***DEBUG***", "inside initializeLayout");
+        Log.d("***DEBUG***", "inside setTodaysDate");
 
         dbh.getTimeBlocksForObjectivePage(this);
 
@@ -100,6 +104,7 @@ public class ObjectivePage extends AppCompatActivity {
         et_effort = cl.findViewById(R.id.et_ObjEffort);
         sp_Frequency = findViewById(R.id.sp_ObjFrequency);
         et_name = cl.findViewById(R.id.et_ObjName);
+        deleteObjective = cl.findViewById(R.id.btn_deleteTimeBlock);
 
         ArrayAdapter<CharSequence> freqAdapter = ArrayAdapter.createFromResource(this,R.array.frequency_array, android.R.layout.simple_spinner_item);
         freqAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -127,7 +132,12 @@ public class ObjectivePage extends AppCompatActivity {
             dbh.createObjective(objective);
         }
 
+        Intent mainActivity = new Intent(this, MainActivity.class);
+        startActivity(mainActivity);
+    }
 
+    public void onClickDeleteObjective(View v, Objective obj) {
+        dbh.deleteObjective(v, obj);
         Intent mainActivity = new Intent(this, MainActivity.class);
         startActivity(mainActivity);
     }
@@ -141,11 +151,18 @@ public class ObjectivePage extends AppCompatActivity {
         et_effort.setText(existingObj.effort);
         sp_TimeBlock.setSelection(Arrays.asList(timeblockList).indexOf(timeBlocksMap.get(existingObj.timeblock.name).name));
         sp_Frequency.setSelection(Arrays.asList(freqArray).indexOf(existingObj.frequency));
+
+        deleteObjective.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onClickDeleteObjective(view, existingObj);
+            }
+        });
     }
 
     private void setDefaultTimeBlock() {
         Log.d("***DEBUG***", "inside setDefaultTimeBlock");
-        sp_TimeBlock.setSelection(Arrays.asList(timeblockList).indexOf(timeBlocksMap.get(timeblockName).name));
+        sp_TimeBlock.setSelection(Arrays.asList(timeblockList).indexOf(timeBlocksMap.get(timeblockId).name));
     }
 
 }

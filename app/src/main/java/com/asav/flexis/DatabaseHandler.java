@@ -2,6 +2,7 @@ package com.asav.flexis;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 
@@ -14,7 +15,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.sql.Time;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static android.content.ContentValues.TAG;
@@ -48,6 +52,7 @@ public class DatabaseHandler {
                                 objectivesMap.put(obj.id, obj);
                             }
                             MA.setObjectivesMap(objectivesMap);
+
                         } else {
                             Log.w(TAG, "Error getting documents.", task.getException());
                         }
@@ -128,6 +133,7 @@ public class DatabaseHandler {
         objective.put("frequency", obj.frequency);
         objective.put("timeblock", obj.timeblock);
         objective.put("timeblockId", obj.timeblockId);
+        objective.put("isComplete", obj.isComplete);
 
         // Update document with a generated ID
         db.collection("objectives").document(obj.id)
@@ -176,7 +182,7 @@ public class DatabaseHandler {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d("***DEBUG***", document.getId() + " => " + document.getData());
                                 TimeBlock tb = document.toObject(TimeBlock.class);
-                                timeblocksMap.put(tb.name, tb);
+                                timeblocksMap.put(tb.id, tb);
                             }
                             OP.populateTimeBlocks(timeblocksMap);
                         } else {
@@ -267,8 +273,104 @@ public class DatabaseHandler {
                 });
     }
 
-    public void deleteTimeBLocks() {
+    public void deleteTimeBlock(View v, TimeBlock tb) {
 
+        final TimeBlock timeBlock = tb;
+
+        db.collection("timeblocks")
+                .document(tb.id)
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Log.d(TAG, "DocumentSnapshot successfully deleted!");
+
+                    //delete id from objectives
+                    removeTimeBlockIdReferences(timeBlock);
+                }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error deleting document", e);
+                    }
+                });
+    }
+
+    public void deleteObjective(View v, Objective obj) {
+        db.collection("objectives")
+                .document(obj.id)
+                .delete()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully deleted!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error deleting document", e);
+                    }
+                });
+
+    }
+
+    private void removeTimeBlockIdReferences(TimeBlock tb) {
+
+
+        //query all objectives where timeblockid is param
+        //update id to null
+        db.collection("objectives").whereEqualTo("timeblockId", tb.id)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        List<Objective> objList = new ArrayList<>();
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("***DEBUG***", document.getId() + " => " + document.getData());
+                                Objective obj = document.toObject(Objective.class);
+                                objList.add(obj);
+                            }
+
+                            if(!objList.isEmpty()) {
+                                updateObjectives(objList);
+                            }
+
+                        } else {
+                            Log.w(TAG, "Error getting documents.", task.getException());
+                        }
+                    }
+                });
+
+    }
+
+    public void updateObjectives(List<Objective> objList) {
+
+        for(Objective o : objList) {
+
+            Map<String, Object> objective = new HashMap<>();
+            objective.put("timeblockid", null);
+            objective.put("timeblock", null);
+
+            db.collection("objectives").document(o.id)
+                    .update(objective)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d("***Debug***", "DocumentSnapshot successfully updated!");
+                            //Toast.makeText(context, "Updated " + wr.name, Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w("***Debug***", "Error updating document", e);
+                            //Toast.makeText(context, "Failed to update " + wr.name, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
 
     }
 }

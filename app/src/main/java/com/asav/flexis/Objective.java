@@ -1,6 +1,6 @@
 package com.asav.flexis;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 
 public class Objective {
 
@@ -12,7 +12,7 @@ public class Objective {
     public String duration;
     public String frequency;
     public String status;
-    public LocalDateTime dateCompleted;
+    public Date dateCompleted;
     public TimeBlock timeblock;
     public String timeblockId;
     public boolean isComplete;

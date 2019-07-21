@@ -1,7 +1,6 @@
 package com.asav.flexis;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
@@ -28,14 +28,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+import static java.time.LocalDateTime.now;
+
+public class MainActivity extends AppCompatActivity implements FragmentAddObjectiveOptions.FragmentAddObjectiveOptionsListener {
 
     private DrawerLayout mDrawerLayout;
 
-    static final String APP_EDIT = "Edit";
-    static final String APP_CREATE = "Create";
-    static final String APP_DELETE = "Delete";
-    static final String APP_VIEW = "View";
+    static final String APP_CREATE = "0";
+    static final String APP_READ = "1";
+    static final String APP_EDIT = "2";
+    static final String APP_DELETE = "3";
+
 
     DatabaseHandler dbh = new DatabaseHandler();
     NotificationHandler notificationHandler;
@@ -61,16 +64,16 @@ public class MainActivity extends AppCompatActivity {
 
         //mDrawerLayout = findViewById(R.id.drawer_layout);
 
-        initializeLayout();
+        setTodaysDate();
+        getTimeBlocksAndObjectives();
         //initializeNavigationView();
 
-        //get each time block and all objectives, draws to screen
-        dbh.getTimeBlocksForMainActivity(this);
+        //reset isComplete flag if necessary
 
     }
 
-    public void initializeLayout() {
-        Log.d("***DEBUG***", "inside initializeLayout");
+    public void setTodaysDate() {
+        Log.d("***DEBUG***", "inside setTodaysDate");
 
         tv_main_todaydate = findViewById(R.id.tv_main_todaydate);
 
@@ -83,7 +86,8 @@ public class MainActivity extends AppCompatActivity {
     public void onClickNewTimeBlock(View v) {
         Log.d("***DEBUG***", "inside onClickNewTimeBlock");
         Intent openNewTimeBlock = new Intent(this, TimeBlockPage.class);
-        startActivity(openNewTimeBlock);
+        //startActivity(openNewTimeBlock);
+        startActivityForResult(openNewTimeBlock, Integer.parseInt(APP_CREATE));
     }
 
     public void onClickEditTimeBlock(View v) {
@@ -118,100 +122,35 @@ public class MainActivity extends AppCompatActivity {
         startActivity(openNewObjective);
     }
 
-    public void onClickNewObjectiveFromTimeblock(View v) {
-        Log.d("***DEBUG***", "inside onClickNewObjectiveFromTimeblock");
+    public void onClickNewObjectiveForTimeblock(String tbId) {
+        Log.d("***DEBUG***", "inside onClickNewObjectiveForTimeblock");
 
-        View parent = (ViewGroup) v.getParent();
-        TextView tv_tbName = parent.findViewById(R.id.tv_timeblock_name);
-        String name = tv_tbName.getText().toString();
         Intent openNewObjective = new Intent(this, ObjectivePage.class);
-        openNewObjective.putExtra("TimeblockName", name);
+        openNewObjective.putExtra("TimeblockId", tbId);
         startActivity(openNewObjective);
     }
 
+    public void onClickAddObjectiveForTimeblock(String tbId) {
+        Log.d("***DEBUG***", "inside onClickNewObjectiveForTimeblock");
 
-    public void populateTodaysTasks(Map<String, Objective> objectivesMap) {
-        Log.d("***Debug***", "inside populateTodaysTasks");
-
-        try {
-            LayoutInflater inflater = LayoutInflater.from(this);
-            LinearLayout ll_current = findViewById(R.id.ll_card_container);
-            ll_current.removeAllViews();
-
-            //add in the current time block text view
-            TextView tv_currentTimeBlock = new TextView(this);
-            tv_currentTimeBlock.setText(currentTimeBlock.name);
-            tv_currentTimeBlock.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-            tv_currentTimeBlock.setTextColor(Color.WHITE);
-            ll_current.addView(tv_currentTimeBlock);
-
-            for(Objective obj : objectivesMap.values()) {
-                if (!obj.isComplete) {
-                    //setup layout stuff
-                    final View objectiveCard = inflater.inflate(R.layout.objective_card_component, null, false);
-                    objectiveCard.setPadding(0, 0, 0, 10);
-                    objectiveCard.setTag(obj);
-                    Log.d("***Debug***", "stored tag: " + objectiveCard.getTag());
-
-
-                    CardView cvActionObjective = objectiveCard.findViewById(R.id.cv_card_action);
-                    cvActionObjective.setOnClickListener(onClickActionObjective);
-
-                    //initialize the layout fields
-                    TextView objectiveName = objectiveCard.findViewById(R.id.tv_objCard_Name);
-                    //TextView objectiveDescription =  objectiveCard.findViewById(R.id.);
-                    TextView objectiveDuration = objectiveCard.findViewById(R.id.tv_objCard_Duration);
-                    TextView objectiveEffort = objectiveCard.findViewById(R.id.tv_objCard_Effort);
-                    //TextView objectiveFrequency =  objectiveCard.findViewById(R.id.tv_objCard_Frequency);
-                    //TextView objectiveTimeBlock =  objectiveCard.findViewById(R.id.tv_objCard_TimeBlock);
-
-                    //set values of imported components
-                    objectiveName.setText(obj.name);
-                    //objectiveDescription.setText(obj.description);
-                    String objDuration = parseDuration(Integer.parseInt(obj.duration));
-                    objectiveDuration.setText(objDuration);
-                    objectiveEffort.setText(obj.effort);
-                    objectiveCard.setOnClickListener(onClickEditObjective);
-
-                    //objectiveFrequency.setText(obj.frequency);
-                    //if(obj.timeblock != null) {
-                    // objectiveTimeBlock.setText(obj.timeblock.name);
-                    //}
-
-                    //Add margins to card for spacing, height, width
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.MATCH_PARENT
-                    );
-                    params.setMargins(0, 5, 0, 5);
-                    objectiveCard.setLayoutParams(params);
-
-
-                    ll_current.addView(objectiveCard);
-                    objectiveCard.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
-                    //add card to view
-
-                    TaskTimer timer = new TaskTimer(this, objectiveCard, Integer.parseInt(obj.duration));
-
-                    timerMap.put(obj, timer);
-                    objectivesViewMap.put(objectiveCard, obj);
-                }
-            }
-        } catch(Exception e) {
-            Log.d("***ERROR***", "populateTodaysTasks: " + e.getMessage());
-            Log.d("***ERROR***", "populateTodaysTasks: " + e);
-            Toast.makeText(this, "Error Occurred", Toast.LENGTH_SHORT).show();
-        }
+        Intent openNewObjective = new Intent(this, ObjectiveList.class);
+        openNewObjective.putExtra("TimeblockId", tbId);
+        startActivity(openNewObjective);
     }
 
-    public void initializeTimeBlockObjectives() {
-        Log.d("***Debug***", "inside initializeTimeBlockObjectives");
+    public void getTimeBlocksAndObjectives() {
+        Log.d("***Debug***", "inside getTimeBlocksAndObjectives");
 
-        populateTimeBlockObjectives(timeblockObjectivesMap);
+        //populates timeblocksmap
+        dbh.getTimeBlocksForMainActivity(this);
+
+        //populates , when finished, drawTimeBlockObjs will be called
+        dbh.getObjectivesForMainActivity(this);
+
     }
 
-    public void populateTimeBlockObjectives(Map<String, List<Objective>> timeblockObjsMap) {
-        Log.d("***Debug***", "inside populateTimeBlockObjectives");
+    public void drawTimeBlockObjectives(Map<String, List<Objective>> timeblockObjsMap) {
+        Log.d("***Debug***", "inside drawTimeBlockObjectives");
 
         LayoutInflater inflater = LayoutInflater.from(this);
         LinearLayout ll_group_wrapper = findViewById(R.id.ll_group_wrapper);
@@ -221,79 +160,87 @@ public class MainActivity extends AppCompatActivity {
         ll_group_wrapper.addView(newGroup);
 
         try {
-
+            // for each timeblock
             for(String tbId : timeblockObjsMap.keySet()) {
-                if (timeblockObjsMap.get(tbId).size() > 0) { //get objectives for time block
+                Log.d("***Debug***", "timeblock: " + tbId);
+                //if (timeblockObjsMap.get(tbId).size() > 0) { //get objectives for time block
                     View v = inflater.inflate(R.layout.timeblock_header, null);
                     ConstraintLayout clTimeblockHeader = v.findViewById(R.id.cl_timeblock_header);
                     TextView tv_timeblock_name = clTimeblockHeader.findViewById(R.id.tv_timeblock_name);
+
                     TextView tv_timeblock_timerange = clTimeblockHeader.findViewById(R.id.tv_timeblock_timerange);
                     ImageView iv_addTask = clTimeblockHeader.findViewById(R.id.iv_add_objective);
                     iv_addTask.setOnClickListener(onClickAddObjective);
-                    TimeBlock currentTB = timeblocksMap.get(tbId);
-                    tv_timeblock_name.setTag(currentTB.id);
-                    tv_timeblock_name.setText(currentTB.name);
-                    tv_timeblock_name.setOnClickListener(onClickEditTimeBlock);
+                    TimeBlock currentTB = null;
+                    if(timeblocksMap.containsKey(tbId)) {
+                        currentTB = timeblocksMap.get(tbId);
+                        tv_timeblock_name.setTag(currentTB.id);
+                        tv_timeblock_name.setText(currentTB.name);
+                        tv_timeblock_name.setOnClickListener(onClickEditTimeBlock);
 
-                    String timeRange = currentTB.startTime + " - " + currentTB.endTime;
-                    tv_timeblock_timerange.setText(timeRange);
+                        String timeRange = currentTB.startTime + " - " + currentTB.endTime;
+                        tv_timeblock_timerange.setText(timeRange);
 
-                    newGroup.addView(clTimeblockHeader);
+                        newGroup.addView(clTimeblockHeader);
+                    }
 
-                    for (Objective obj : timeblockObjsMap.get(currentTB.id)) {
+                    // for each objective in a timeblock
+                    if(currentTB != null && timeblockObjsMap.containsKey(currentTB.id)) {
+                        for (Objective obj : timeblockObjsMap.get(currentTB.id)) {
 
-                        if (!obj.isComplete) {
-                            //setup layout stuff
+                            if (!obj.isComplete) {
+                                //setup layout stuff
 
-                            final View objectiveCard = inflater.inflate(R.layout.objective_card_component, null, false);
-                            objectiveCard.setPadding(0, 0, 0, 10);
-                            objectiveCard.setTag(obj);
+                                final View objectiveCard = inflater.inflate(R.layout.objective_card_component, null, false);
+                                objectiveCard.setPadding(0, 0, 0, 10);
+                                objectiveCard.setTag(obj);
 
-                            CardView cvActionObjective = objectiveCard.findViewById(R.id.cv_card_action);
-                            cvActionObjective.setOnClickListener(onClickActionObjective);
+                                CardView cvActionObjective = objectiveCard.findViewById(R.id.cv_card_action);
+                                cvActionObjective.setOnClickListener(onClickActionObjective);
 
-                            //initialize the layout fields
-                            TextView objectiveName = objectiveCard.findViewById(R.id.tv_objCard_Name);
-                            //TextView objectiveDescription =  objectiveCard.findViewById(R.id.);
-                            TextView objectiveDuration = objectiveCard.findViewById(R.id.tv_objCard_Duration);
-                            TextView objectiveEffort = objectiveCard.findViewById(R.id.tv_objCard_Effort);
-                            //TextView objectiveFrequency =  objectiveCard.findViewById(R.id.tv_objCard_Frequency);
+                                //initialize the layout fields
+                                TextView objectiveName = objectiveCard.findViewById(R.id.tv_objCard_Name);
+                                //TextView objectiveDescription =  objectiveCard.findViewById(R.id.);
+                                TextView objectiveDuration = objectiveCard.findViewById(R.id.tv_objCard_Duration);
+                                TextView objectiveEffort = objectiveCard.findViewById(R.id.tv_objCard_Effort);
+                                //TextView objectiveFrequency =  objectiveCard.findViewById(R.id.tv_objCard_Frequency);
 
-                            //set values of imported components
-                            objectiveName.setText(obj.name);
-                            //objectiveDescription.setText(obj.description);
-                            String objDuration = "0";
-                            if(obj.duration != null && !obj.duration.equals("")) {
-                                objDuration = parseDuration(Integer.parseInt(obj.duration));
-                                TaskTimer timer = new TaskTimer(this, objectiveCard, Integer.parseInt(obj.duration));
+                                //set values of imported components
+                                objectiveName.setText(obj.name);
+                                //objectiveDescription.setText(obj.description);
+                                String objDuration = "0";
+                                if (obj.duration != null && !obj.duration.equals("")) {
+                                    objDuration = parseDuration(Integer.parseInt(obj.duration));
+                                    TaskTimer timer = new TaskTimer(this, objectiveCard, Integer.parseInt(obj.duration));
 
-                                timerMap.put(obj, timer);
+                                    timerMap.put(obj, timer);
+                                }
+
+                                objectiveDuration.setText(objDuration);
+                                objectiveEffort.setText(obj.effort);
+                                objectiveCard.setOnClickListener(onClickEditObjective);
+
+                                //objectiveFrequency.setText(obj.frequency);
+
+                                //Add margins to card for spacing, height, width
+                                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.MATCH_PARENT
+                                );
+                                params.setMargins(0, 5, 0, 5);
+                                objectiveCard.setLayoutParams(params);
+                                newGroup.addView(objectiveCard);
+
+                                objectiveCard.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
+                                objectivesViewMap.put(objectiveCard, obj);
                             }
-
-                            objectiveDuration.setText(objDuration);
-                            objectiveEffort.setText(obj.effort);
-                            objectiveCard.setOnClickListener(onClickEditObjective);
-
-                            //objectiveFrequency.setText(obj.frequency);
-
-                            //Add margins to card for spacing, height, width
-                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                                    LinearLayout.LayoutParams.MATCH_PARENT
-                            );
-                            params.setMargins(0, 5, 0, 5);
-                            objectiveCard.setLayoutParams(params);
-                            newGroup.addView(objectiveCard);
-
-                            objectiveCard.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
-                            objectivesViewMap.put(objectiveCard, obj);
                         }
                     }
-                }
+                //}
             }
         } catch(Exception e) {
-            Log.d("***ERROR***", "populateTimeBlockObjectives: " + e.getMessage());
-            Log.d("***ERROR***", "populateTimeBlockObjectives: " + e);
+            Log.d("***ERROR***", "drawTimeBlockObjectives: " + e.getMessage());
+            Log.d("***ERROR***", "drawTimeBlockObjectives: " + e);
             printStackTrace(e.getStackTrace());
             Toast.makeText(this, "Error Occurred", Toast.LENGTH_SHORT).show();
         }
@@ -390,12 +337,14 @@ public class MainActivity extends AppCompatActivity {
         //mark objective to be excluded from list
         objective.isComplete = true;
 
-        //update database to show complete?
+        objective.dateCompleted = Calendar.getInstance().getTime();
 
-        //prompt user to select next task to begin
+        //update database to show complete?
+        dbh.updateObjective(objective);
+
+        //prompt user to select next task to begin?
         //redraw list of objectives
-        //populateTodaysTasks(objectivesMap);
-        populateTimeBlockObjectives(timeblockObjectivesMap);
+        drawTimeBlockObjectives(timeblockObjectivesMap);
     }
 
     private String parseDuration(int duration) {
@@ -435,14 +384,19 @@ public class MainActivity extends AppCompatActivity {
     public void setTimeBlockObjectivesMap(Map<String, TimeBlock> tbm, Map<String, Objective> objm) {
         Log.d("***Debug***", "inside setTimeBlockObjectivesMap");
 
-        for(Objective obj : objm.values()) {
-            if (obj.timeblockId != null) {
-                if (!timeblockObjectivesMap.containsKey(obj.timeblockId)) {
-                    timeblockObjectivesMap.put(obj.timeblockId, new ArrayList<Objective>());
+        for(TimeBlock tb : tbm.values()) {
+            if (!timeblockObjectivesMap.containsKey(tb.id)) {
+                timeblockObjectivesMap.put(tb.id, new ArrayList<Objective>());
+            }
+
+            for(Objective obj : objm.values()) {
+                if (obj.timeblockId != null && obj.timeblock.id.equals(tb.id)) {
+                    timeblockObjectivesMap.get(obj.timeblockId).add(obj);
                 }
-                timeblockObjectivesMap.get(obj.timeblockId).add(obj);
             }
         }
+
+        drawTimeBlockObjectives(timeblockObjectivesMap);
     }
 
 
@@ -457,7 +411,6 @@ public class MainActivity extends AppCompatActivity {
         Log.d("***DEBUG***", "inside MA.setTimeBlocksMap");
         this.timeblocksMap = timeblocksMap;
 
-        dbh.getObjectivesForMainActivity(this);
     }
 
     public void setObjectivesMap(Map<String, Objective> objectivesMap) {
@@ -465,15 +418,19 @@ public class MainActivity extends AppCompatActivity {
 
         this.objectivesMap = objectivesMap;
 
+        //db call finished, create the final map
         setTimeBlockObjectivesMap(timeblocksMap, objectivesMap);
-        initializeTimeBlockObjectives();
 
     }
 
     private View.OnClickListener onClickAddObjective = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            onClickNewObjectiveFromTimeblock(v);
+
+            View parent = (ViewGroup) v.getParent();
+            String tbId = (String) parent.findViewById(R.id.tv_timeblock_name).getTag();
+
+            showObjectiveOptionsDialog(tbId);
         }
     };
 
@@ -486,8 +443,46 @@ public class MainActivity extends AppCompatActivity {
 
     private void printStackTrace(StackTraceElement[] ste) {
         for(StackTraceElement s : ste) {
-            Log.d("***ERROR***", "populateTimeBlockObjectives" + s.toString());
+            Log.d("***ERROR***", "drawTimeBlockObjectives" + s.toString());
         }
     }
 
+    private void showObjectiveOptionsDialog(String tbId) {
+        FragmentManager fm = getSupportFragmentManager();
+
+        FragmentAddObjectiveOptions objOptionsFragment = FragmentAddObjectiveOptions.newInstance("Choose from...", tbId);
+
+        objOptionsFragment.show(fm, "fragment_add_objective_options");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        String reqCode = requestCode + "";
+        // Check which request we're responding to
+        if (reqCode.equals(APP_CREATE) || reqCode.equals(APP_EDIT)) {
+
+            //run queries again and refresh the display to show new / edited / deleted data
+
+
+            // Make sure the request was successful
+            /*if (resultCode == RESULT_OK) {
+                // The user picked a contact.
+                // The Intent's data Uri identifies which contact was selected.
+
+                // Do something with the contact here (bigger example below)
+            }*/
+        }
+    }
+
+    @Override
+    public void onFinishEditDialog(String inputText, String tbId) {
+        Toast.makeText(this, "Hi, " + inputText, Toast.LENGTH_SHORT).show();
+        if(inputText.equals("New")) {
+            onClickNewObjectiveForTimeblock(tbId);
+        }
+        else {
+            onClickAddObjectiveForTimeblock(tbId);
+        }
+    }
 }

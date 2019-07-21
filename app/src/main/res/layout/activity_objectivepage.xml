@@ -62,7 +62,8 @@
             <Spinner
                 android:id="@+id/sp_ObjFrequency"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textAlignment="center" />
 
             <TextView
                 android:id="@+id/tv_ObjTimeBlock"
@@ -74,14 +75,22 @@
             <Spinner
                 android:id="@+id/sp_ObjTimeBlock"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:textAlignment="center" />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/btn_saveTimeBlock"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="onClickSaveObjective"
                 android:text="Save" />
+
+            <Button
+                android:id="@+id/btn_deleteTimeBlock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:onClick="onClickDeleteObjective"
+                android:text="Delete" />
 
         </LinearLayout>
     </ScrollView>

@@ -5,8 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -15,10 +15,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.gson.Gson;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Set;
 
+import static com.asav.flexis.MainActivity.APP_CREATE;
 import static com.asav.flexis.MainActivity.APP_EDIT;
 
 public class TimeBlockPage extends AppCompatActivity {
@@ -33,6 +33,7 @@ public class TimeBlockPage extends AppCompatActivity {
     String category = "";
 
     TextView tv_BlockStartTime, tv_BlockEndTime;
+    Button btnDeleteTimeBlock;
 
     TimeBlock timeblock = null;
 
@@ -46,6 +47,7 @@ public class TimeBlockPage extends AppCompatActivity {
         setupTimePickers();
 
         Set<String> categories = getIntent().getCategories();
+
         getIntent().getExtras();
 
         Intent intent = getIntent();
@@ -58,7 +60,7 @@ public class TimeBlockPage extends AppCompatActivity {
                 if(categories != null && categories.contains(APP_EDIT)) {
                     category = APP_EDIT;
                     existingTimeBlock = timeblock;
-                    populateFields(existingTimeBlock);
+                    populateFields();
                 }
             }
         }
@@ -66,17 +68,18 @@ public class TimeBlockPage extends AppCompatActivity {
     }
 
     public void initializeLayout() {
-        Log.d("***DEBUG***", "inside initializeLayout");
+        Log.d("***DEBUG***", "inside setTodaysDate");
 
         cl = findViewById(R.id.cl_blockPage);
         et_name = cl.findViewById(R.id.et_BlockName);
         et_description = cl.findViewById(R.id.et_BlockDescription);
         tv_BlockStartTime = cl.findViewById(R.id.tv_BlockStartTime);
         tv_BlockEndTime = cl.findViewById(R.id.tv_BlockEndTime);
+        btnDeleteTimeBlock = cl.findViewById(R.id.btn_deleteTimeBlock);
     }
 
     public void setupTimePickers() {
-        Log.d("***DEBUG***", "inside initializeTimePickers");
+        Log.d("***DEBUG***", "inside setupTimePickers");
 
         tv_BlockStartTime.setOnClickListener(new View.OnClickListener() {
 
@@ -169,15 +172,20 @@ public class TimeBlockPage extends AppCompatActivity {
         });
     }
 
-    private void populateFields(TimeBlock timeblock) {
+    private void populateFields() {
         Log.d("***DEBUG***", "inside populateFields");
 
-        et_name.setText(timeblock.name);
-        et_description.setText(timeblock.description);
+        et_name.setText(existingTimeBlock.name);
+        et_description.setText(existingTimeBlock.description);
         //start and end times
-        tv_BlockStartTime.setText(timeblock.startTime);
-        tv_BlockEndTime.setText(timeblock.endTime);
-
+        tv_BlockStartTime.setText(existingTimeBlock.startTime);
+        tv_BlockEndTime.setText(existingTimeBlock.endTime);
+        btnDeleteTimeBlock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onClickDeleteTimeBlock(view, existingTimeBlock);
+            }
+        });
     }
 
     public void onClickSaveTimeBlock(View v) {
@@ -194,6 +202,11 @@ public class TimeBlockPage extends AppCompatActivity {
 
         Intent mainActivity = new Intent(this, MainActivity.class);
         startActivity(mainActivity);
+    }
+
+    public void onClickDeleteTimeBlock(View v, TimeBlock tb) {
+        dbh.deleteTimeBlock(v, tb);
+        finishActivity(Integer.parseInt(APP_CREATE));
     }
 
 }
