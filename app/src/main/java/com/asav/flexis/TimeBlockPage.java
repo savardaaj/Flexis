@@ -13,10 +13,15 @@ import android.widget.TimePicker;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.firebase.Timestamp;
 import com.google.gson.Gson;
 
+//import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Set;
+import java.util.Date;
 
 import static com.asav.flexis.MainActivity.APP_CREATE;
 import static com.asav.flexis.MainActivity.APP_EDIT;
@@ -85,7 +90,6 @@ public class TimeBlockPage extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
                 Calendar mcurrentTime = Calendar.getInstance();
                 int hour, minute;
                 if(existingTimeBlock == null) {
@@ -96,12 +100,10 @@ public class TimeBlockPage extends AppCompatActivity {
                     hour = Integer.parseInt(existingTimeBlock.startTime.substring(0, 2));
                     minute = Integer.parseInt(existingTimeBlock.startTime.substring(3, 5));
 
-                    if(existingTimeBlock.startTime.substring(6, 8).equals("pm")) {
+                    if(existingTimeBlock.startTime.toString().substring(6, 8).equals("pm")) {
                         hour += 12;
                     }
                 }
-
-
 
                 TimePickerDialog mTimePicker;
                 mTimePicker = new TimePickerDialog(TimeBlockPage.this, new TimePickerDialog.OnTimeSetListener() {
@@ -128,7 +130,6 @@ public class TimeBlockPage extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                // TODO Auto-generated method stub
                 Calendar mcurrentTime = Calendar.getInstance();
                 int hour, minute;
                 if(existingTimeBlock == null) {
@@ -191,14 +192,34 @@ public class TimeBlockPage extends AppCompatActivity {
     public void onClickSaveTimeBlock(View v) {
         Log.d("***DEBUG***", "inside onClickSaveBlockTime");
 
+        Date startDate = new Date();
+        Date endDate = new Date();
+
+        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a");
+        try {
+            startDate = formatter.parse(tv_BlockStartTime.getText().toString());
+            endDate = formatter.parse(tv_BlockEndTime.getText().toString());
+        }
+        catch (Exception e) {
+
+        }
+
         TimeBlock timeblock = new TimeBlock();
         timeblock.userId = "test123";
         timeblock.name = et_name.getText().toString();
         timeblock.description = et_description.getText().toString();
         timeblock.startTime = tv_BlockStartTime.getText().toString();
         timeblock.endTime = tv_BlockEndTime.getText().toString();
+        timeblock.startTimestamp = new Timestamp(startDate);
+        timeblock.endTimestamp = new Timestamp(endDate);
 
-        dbh.createTimeBlock(timeblock);
+        if(existingTimeBlock != null) {
+            timeblock.id = existingTimeBlock.id;
+            dbh.updateTimeBlock(timeblock);
+        }
+        else {
+            dbh.createTimeBlock(timeblock);
+        }
 
         Intent mainActivity = new Intent(this, MainActivity.class);
         startActivity(mainActivity);
@@ -207,6 +228,7 @@ public class TimeBlockPage extends AppCompatActivity {
     public void onClickDeleteTimeBlock(View v, TimeBlock tb) {
         dbh.deleteTimeBlock(v, tb);
         finishActivity(Integer.parseInt(APP_CREATE));
+        finish();
     }
 
 }

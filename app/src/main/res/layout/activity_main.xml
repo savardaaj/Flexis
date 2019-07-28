@@ -88,17 +88,7 @@
             android:id="@+id/ll_group_wrapper"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:id="@+id/ll_card_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/colorPrimaryDark"
-                android:orientation="vertical"
-                app:layout_constraintTop_toBottomOf="@+id/tv_main_today"/>
-
-        </LinearLayout>
+            android:orientation="vertical"/>
     </ScrollView>
 
 

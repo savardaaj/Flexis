@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
     Map<String, TimeBlock> timeblocksMap = new HashMap<>();
     Map<View, Objective> objectivesViewMap = new HashMap<>();
     Map<Objective, TaskTimer> timerMap = new HashMap<>();
+
+    List<LinearLayout> llGroupList = new ArrayList<>();
 
     TextView tv_main_todaydate;
     TextView tv_card_begin;
@@ -106,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
                     extras.putString("details", timeblockJSON);
                     editTimeBlock.putExtras(extras);
                     editTimeBlock.addCategory(APP_EDIT);
-                    startActivity(editTimeBlock);
+                    startActivityForResult(editTimeBlock, Integer.parseInt(APP_EDIT));
                 }
             }
         } catch(Exception e) {
@@ -127,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
 
         Intent openNewObjective = new Intent(this, ObjectivePage.class);
         openNewObjective.putExtra("TimeblockId", tbId);
-        startActivity(openNewObjective);
+        startActivityForResult(openNewObjective, Integer.parseInt(APP_CREATE));
     }
 
     public void onClickAddObjectiveForTimeblock(String tbId) {
@@ -135,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
 
         Intent openNewObjective = new Intent(this, ObjectiveList.class);
         openNewObjective.putExtra("TimeblockId", tbId);
-        startActivity(openNewObjective);
+        startActivityForResult(openNewObjective, Integer.parseInt(APP_EDIT));
     }
 
     public void getTimeBlocksAndObjectives() {
@@ -144,16 +147,22 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         //populates timeblocksmap
         dbh.getTimeBlocksForMainActivity(this);
 
-        //populates , when finished, drawTimeBlockObjs will be called
-        dbh.getObjectivesForMainActivity(this);
+
 
     }
 
     public void drawTimeBlockObjectives(Map<String, List<Objective>> timeblockObjsMap) {
         Log.d("***Debug***", "inside drawTimeBlockObjectives");
 
+        if(!llGroupList.isEmpty()) {
+            for(LinearLayout ll : llGroupList) {
+                ll.removeAllViews();
+            }
+        }
+
         LayoutInflater inflater = LayoutInflater.from(this);
         LinearLayout ll_group_wrapper = findViewById(R.id.ll_group_wrapper);
+        ll_group_wrapper.removeAllViews();
         LinearLayout newGroup = new LinearLayout(this);
         newGroup.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
         newGroup.setOrientation(LinearLayout.VERTICAL);
@@ -162,7 +171,6 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         try {
             // for each timeblock
             for(String tbId : timeblockObjsMap.keySet()) {
-                Log.d("***Debug***", "timeblock: " + tbId);
                 //if (timeblockObjsMap.get(tbId).size() > 0) { //get objectives for time block
                     View v = inflater.inflate(R.layout.timeblock_header, null);
                     ConstraintLayout clTimeblockHeader = v.findViewById(R.id.cl_timeblock_header);
@@ -177,6 +185,8 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
                         tv_timeblock_name.setTag(currentTB.id);
                         tv_timeblock_name.setText(currentTB.name);
                         tv_timeblock_name.setOnClickListener(onClickEditTimeBlock);
+
+                        //convert military time to regular time based on custom setting
 
                         String timeRange = currentTB.startTime + " - " + currentTB.endTime;
                         tv_timeblock_timerange.setText(timeRange);
@@ -233,6 +243,8 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
 
                                 objectiveCard.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
                                 objectivesViewMap.put(objectiveCard, obj);
+
+                                llGroupList.add(newGroup);
                             }
                         }
                     }
@@ -348,8 +360,6 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
     }
 
     private String parseDuration(int duration) {
-        Log.d("***Debug***", "inside parseDuration");
-
         int minutes = duration % 60;
         int hours = duration / 60;
         int seconds = 0;
@@ -384,13 +394,15 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
     public void setTimeBlockObjectivesMap(Map<String, TimeBlock> tbm, Map<String, Objective> objm) {
         Log.d("***Debug***", "inside setTimeBlockObjectivesMap");
 
+        timeblockObjectivesMap = new HashMap<>();
+
         for(TimeBlock tb : tbm.values()) {
             if (!timeblockObjectivesMap.containsKey(tb.id)) {
                 timeblockObjectivesMap.put(tb.id, new ArrayList<Objective>());
             }
 
             for(Objective obj : objm.values()) {
-                if (obj.timeblockId != null && obj.timeblock.id.equals(tb.id)) {
+                if (obj.timeblockId != null && obj.timeblock != null && obj.timeblock.id.equals(tb.id)) {
                     timeblockObjectivesMap.get(obj.timeblockId).add(obj);
                 }
             }
@@ -398,7 +410,6 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
 
         drawTimeBlockObjectives(timeblockObjectivesMap);
     }
-
 
     public void setCurrentTimeBlock(TimeBlock tb) {
         Log.d("***DEBUG***", "inside MA.CurrentTimeBlock");
@@ -411,6 +422,8 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         Log.d("***DEBUG***", "inside MA.setTimeBlocksMap");
         this.timeblocksMap = timeblocksMap;
 
+        //populates , when finished, drawTimeBlockObjs will be called
+        dbh.getObjectivesForMainActivity(this);
     }
 
     public void setObjectivesMap(Map<String, Objective> objectivesMap) {
@@ -447,12 +460,35 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         }
     }
 
-    private void showObjectiveOptionsDialog(String tbId) {
-        FragmentManager fm = getSupportFragmentManager();
-
+    private void showObjectiveOptionsDialog(final String tbId) {
+        /*FragmentManager fm = getSupportFragmentManager();
         FragmentAddObjectiveOptions objOptionsFragment = FragmentAddObjectiveOptions.newInstance("Choose from...", tbId);
+        objOptionsFragment.show(fm, "fragment_add_objective_options");*/
+        LayoutInflater inflater = getLayoutInflater();
+        View dialoglayout = inflater.inflate(R.layout.fragment_add_objective_options, null);
+        TextView tvNew = dialoglayout.findViewById(R.id.tv_from_new);
+        TextView tvExisting = dialoglayout.findViewById(R.id.tv_from_existing);
 
-        objOptionsFragment.show(fm, "fragment_add_objective_options");
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(dialoglayout);
+        final AlertDialog ad = builder.show();
+
+        tvNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onClickNewObjectiveForTimeblock(tbId);
+                ad.dismiss();
+            }
+        });
+        tvExisting.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onClickAddObjectiveForTimeblock(tbId);
+                ad.dismiss();
+            }
+        });
+
+
     }
 
     @Override
@@ -463,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         if (reqCode.equals(APP_CREATE) || reqCode.equals(APP_EDIT)) {
 
             //run queries again and refresh the display to show new / edited / deleted data
-
+            getTimeBlocksAndObjectives();
 
             // Make sure the request was successful
             /*if (resultCode == RESULT_OK) {
@@ -485,4 +521,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
             onClickAddObjectiveForTimeblock(tbId);
         }
     }
+
+
+
 }

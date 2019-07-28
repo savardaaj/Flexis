@@ -16,7 +16,11 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.sql.Time;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +126,7 @@ public class DatabaseHandler {
     }
 
     public void updateObjective(Objective obj) {
-        Log.d("***DEBUG***", "inside createObjectives");
+        Log.d("***DEBUG***", "inside updateObjectives");
 
         Map<String, Object> objective = new HashMap<>();
         objective.put("userId", obj.userId);
@@ -198,7 +202,14 @@ public class DatabaseHandler {
         final MainActivity MA = (MainActivity) context;
         final Map<String, TimeBlock> timeblocksMap = new HashMap<>();
 
-        db.collection("timeblocks")
+        Date now = new Date();
+        String strDateFormat = "hh:mm a";
+        DateFormat dateFormat = new SimpleDateFormat(strDateFormat);
+        String formattedDate = dateFormat.format(now);
+
+        Log.d("***DEBUG***", "formattedDate: " + formattedDate);
+
+        db.collection("timeblocks")//.whereGreaterThan("endTimestamp", formattedDate)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -252,8 +263,14 @@ public class DatabaseHandler {
         timeblock.put("userId", tb.userId);
         timeblock.put("name", tb.name);
         timeblock.put("description", tb.description);
+
+        //convert display times to military times
+        //convertToMilitary();
+
         timeblock.put("startTime", tb.startTime);
         timeblock.put("endTime", tb.endTime);
+        timeblock.put("startTimestamp", tb.startTimestamp);
+        timeblock.put("endTimestamp", tb.endTimestamp);
 
         // Add a new document with a generated ID
         db.collection("timeblocks")
@@ -318,7 +335,6 @@ public class DatabaseHandler {
 
     private void removeTimeBlockIdReferences(TimeBlock tb) {
 
-
         //query all objectives where timeblockid is param
         //update id to null
         db.collection("objectives").whereEqualTo("timeblockId", tb.id)
@@ -372,5 +388,51 @@ public class DatabaseHandler {
                     });
         }
 
+    }
+
+    public void updateTimeBlock(TimeBlock tb) {
+
+        Map<String, Object> timeblock = new HashMap<>();
+        timeblock.put("userId", tb.userId);
+        timeblock.put("name", tb.name);
+        timeblock.put("description", tb.description);
+
+        //convert display times to military times
+        //convertToMilitary();
+
+        timeblock.put("startTime", tb.startTime);
+        timeblock.put("endTime", tb.endTime);
+        timeblock.put("startTimestamp", tb.startTimestamp);
+        timeblock.put("endTimestamp", tb.endTimestamp);
+
+        db.collection("timeblocks").document(tb.id)
+                .update(timeblock)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("***Debug***", "DocumentSnapshot successfully updated!");
+                        //Toast.makeText(context, "Updated " + wr.name, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w("***Debug***", "Error updating document", e);
+                        //Toast.makeText(context, "Failed to update " + wr.name, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+    }
+
+    private Date convertToMilitary(String time) {
+        String actualTime = time.substring(0, 5);
+        String ampm = time.substring(6, 8);
+        //Date newTime = Calendar.getInstance().setTime(actualTime);
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+
+        if(ampm.equals("pm")) {
+
+        }
+        return null;
     }
 }

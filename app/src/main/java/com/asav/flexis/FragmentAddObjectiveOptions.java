@@ -78,6 +78,7 @@ public class FragmentAddObjectiveOptions extends DialogFragment implements TextV
         // 2. Setup a callback when the "Done" button is pressed on keyboard
         tvNew.setOnEditorActionListener(this);
         tvFromExisting.setOnEditorActionListener(this);
+
     }
 
     // Fires whenever the textfield has an action performed

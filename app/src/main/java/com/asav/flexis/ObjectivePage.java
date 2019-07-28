@@ -149,7 +149,7 @@ public class ObjectivePage extends AppCompatActivity {
         et_description.setText(existingObj.description);
         et_duration.setText(existingObj.duration);
         et_effort.setText(existingObj.effort);
-        sp_TimeBlock.setSelection(Arrays.asList(timeblockList).indexOf(timeBlocksMap.get(existingObj.timeblock.name).name));
+        sp_TimeBlock.setSelection(Arrays.asList(timeblockList).indexOf(timeBlocksMap.get(existingObj.timeblock.id).name));
         sp_Frequency.setSelection(Arrays.asList(freqArray).indexOf(existingObj.frequency));
 
         deleteObjective.setOnClickListener(new View.OnClickListener() {
