@@ -209,7 +209,7 @@ public class DatabaseHandler {
 
         Log.d("***DEBUG***", "formattedDate: " + formattedDate);
 
-        db.collection("timeblocks")//.whereGreaterThan("endTimestamp", formattedDate)
+        db.collection("timeblocks")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override

@@ -210,8 +210,11 @@ public class TimeBlockPage extends AppCompatActivity {
         timeblock.description = et_description.getText().toString();
         timeblock.startTime = tv_BlockStartTime.getText().toString();
         timeblock.endTime = tv_BlockEndTime.getText().toString();
-        timeblock.startTimestamp = new Timestamp(startDate);
-        timeblock.endTimestamp = new Timestamp(endDate);
+
+        Log.d("***DEBUG***", "Before conversion: " + timeblock.startTime);
+        timeblock.startTimestamp = TimeConverter.convertToGMTFromDisplay(timeblock.startTime);
+        Log.d("***DEBUG***", "After conversion: " + timeblock.startTimestamp);
+        timeblock.endTimestamp = TimeConverter.convertToGMTFromDisplay(timeblock.endTime);
 
         if(existingTimeBlock != null) {
             timeblock.id = existingTimeBlock.id;

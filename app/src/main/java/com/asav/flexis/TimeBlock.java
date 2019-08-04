@@ -8,8 +8,10 @@ public class TimeBlock {
     public String userId;
     public String name;
     public String description;
-    public Timestamp endTimestamp;
-    public Timestamp startTimestamp;
+    //public Timestamp endTimestamp;
+    //public Timestamp startTimestamp;
     public String endTime;
     public String startTime;
+    public String startTimestamp;
+    public String endTimestamp;
 }

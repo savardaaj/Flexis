@@ -25,11 +25,15 @@ import com.google.gson.Gson;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import static java.time.LocalDateTime.now;
+import static java.util.Map.Entry.comparingByValue;
+import static java.util.stream.Collectors.toMap;
 
 public class MainActivity extends AppCompatActivity implements FragmentAddObjectiveOptions.FragmentAddObjectiveOptionsListener {
 
@@ -397,16 +401,27 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         timeblockObjectivesMap = new HashMap<>();
 
         for(TimeBlock tb : tbm.values()) {
-            if (!timeblockObjectivesMap.containsKey(tb.id)) {
+
+            Date endTime = TimeConverter.convertDisplayToDate(tb.endTime);
+            Date currentTime = TimeConverter.getCurrentTime();
+
+            Log.d("***Debug***", "endTime: " + endTime);
+            Log.d("***Debug***", "currentTime: " + currentTime);
+
+            //anything where the endtime has passed should be excluded
+            if (!timeblockObjectivesMap.containsKey(tb.id) && endTime.after(currentTime)) {
                 timeblockObjectivesMap.put(tb.id, new ArrayList<Objective>());
             }
 
             for(Objective obj : objm.values()) {
-                if (obj.timeblockId != null && obj.timeblock != null && obj.timeblock.id.equals(tb.id)) {
+                if (obj.timeblockId != null && obj.timeblock != null && obj.timeblock.id.equals(tb.id) && timeblockObjectivesMap.containsKey(tb.id)) {
                     timeblockObjectivesMap.get(obj.timeblockId).add(obj);
                 }
             }
         }
+
+
+
 
         drawTimeBlockObjectives(timeblockObjectivesMap);
     }
@@ -454,7 +469,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         }
     };
 
-    private void printStackTrace(StackTraceElement[] ste) {
+    public static void printStackTrace(StackTraceElement[] ste) {
         for(StackTraceElement s : ste) {
             Log.d("***ERROR***", "drawTimeBlockObjectives" + s.toString());
         }
