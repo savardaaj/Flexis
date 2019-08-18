@@ -420,9 +420,6 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
             }
         }
 
-
-
-
         drawTimeBlockObjectives(timeblockObjectivesMap);
     }
 

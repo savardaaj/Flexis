@@ -17,7 +17,8 @@
     <string name="obj_name">Name</string>
     <string name="obj_description">Description</string>
     <string name="obj_effort">Effort</string>
-    <string name="obj_duration">Duration in minutes</string>
+    <string name="obj_hours">Hours</string>
+    <string name="obj_minutes">Minutes</string>
     <string name="obj_frequency">Frequency</string>
     <string name="obj_timeblock">Time Block</string>
 

@@ -2,6 +2,7 @@ package com.asav.flexis;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -17,6 +18,8 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,11 +32,12 @@ public class ObjectivePage extends AppCompatActivity {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     DatabaseHandler dbh = new DatabaseHandler();
 
-    Map<String, TimeBlock> timeBlocksMap;
-    ArrayList<String> timeblockNameList;
+    Map<String, TimeBlock> timeBlockIdMap;
+    Map<String, TimeBlock> timeBlockNameMap = new HashMap<>();
+    List<String> timeblockNameList;
 
     ConstraintLayout cl;
-    EditText et_name, et_description, et_duration, et_effort;
+    EditText et_name, et_description, et_hours, et_minutes, et_effort;
     Spinner sp_Frequency;
     Spinner sp_TimeBlock;
     Button deleteObjective;
@@ -72,22 +76,21 @@ public class ObjectivePage extends AppCompatActivity {
         }
     }
 
+    //map of ID, timeblock
     public void populateTimeBlocks(Map<String, TimeBlock> timeblocksMap) {
         Log.d("***DEBUG***", "inside populateTImeBlocks");
 
         this.timeblockNameList = new ArrayList<>();
-        this.timeBlocksMap = timeblocksMap;
+        this.timeBlockIdMap = timeblocksMap;
 
 
         //iterate over loop, get all names.
         for(TimeBlock tb : timeblocksMap.values()) {
             if(tb.name != null) {
                 this.timeblockNameList.add(tb.name);
+                this.timeBlockNameMap.put(tb.name, tb);
             }
         }
-
-        //convert map to string[]
-        //this.timeblockNameList = timeblocksMap.keySet().toArray(new String[timeblocksMap.keySet().size()]);
 
         sp_TimeBlock = findViewById(R.id.sp_ObjTimeBlock);
         ArrayAdapter<String> timeBlockAdapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_spinner_item, this.timeblockNameList);
@@ -108,14 +111,16 @@ public class ObjectivePage extends AppCompatActivity {
 
         dbh.getTimeBlocksForObjectivePage(this);
 
-        cl = findViewById(R.id.cl_objectivePage);
+        cl = findViewById(R.id.cl_objectivePageContent);
         et_name = cl.findViewById(R.id.et_ObjName);
         et_description = cl.findViewById(R.id.et_ObjDescription);
-        et_duration = cl.findViewById(R.id.et_ObjDuration);
+        et_hours = cl.findViewById(R.id.et_ObjHours);
+        et_minutes = cl.findViewById(R.id.et_ObjMinutes);
         et_effort = cl.findViewById(R.id.et_ObjEffort);
         sp_Frequency = findViewById(R.id.sp_ObjFrequency);
         et_name = cl.findViewById(R.id.et_ObjName);
         deleteObjective = cl.findViewById(R.id.btn_deleteTimeBlock);
+        deleteObjective.setVisibility(View.INVISIBLE);
 
         ArrayAdapter<CharSequence> freqAdapter = ArrayAdapter.createFromResource(this,R.array.frequency_array, android.R.layout.simple_spinner_item);
         freqAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -127,24 +132,38 @@ public class ObjectivePage extends AppCompatActivity {
 
         Objective objective = new Objective();
         objective.userId = "test123";
-        objective.name = et_name.getText().toString();
-        objective.description = et_description.getText().toString();
-        objective.duration = et_duration.getText().toString();
-        objective.effort = et_effort.getText().toString();
-        objective.frequency = sp_Frequency.getSelectedItem().toString();
-        objective.timeblock = timeBlocksMap.get(sp_TimeBlock.getSelectedItem().toString());
-        objective.timeblockId = timeBlocksMap.get(sp_TimeBlock.getSelectedItem().toString()).id;
 
-        if(category.equals(APP_EDIT)) {
-            objective.id = existingObj.id;
-            dbh.updateObjective(objective);
+        if(TextUtils.isEmpty(et_name.getText())) {
+            et_name.setError( "Name is required!" );
         }
-        else {
-            dbh.createObjective(objective);
+        if (TextUtils.isEmpty(et_hours.getText()) && TextUtils.isEmpty(et_minutes.getText())) {
+            et_hours.setError( "Some duration is required!");
+            et_minutes.setError( "Some duration is required!");
         }
 
-        Intent mainActivity = new Intent(this, MainActivity.class);
-        startActivity(mainActivity);
+        //Don't move on if there are errors
+        if(et_name.getError() == null && et_hours.getError() == null && et_minutes.getError() == null) {
+            objective.name = et_name.getText().toString();
+            objective.description = et_description.getText().toString();
+            objective.duration = (Integer.valueOf(et_hours.getText().toString()) * 60 ) + Integer.valueOf(et_minutes.getText().toString()) + ""; //convert to minutes
+            objective.effort = et_effort.getText().toString();
+            objective.frequency = sp_Frequency.getSelectedItem().toString();
+
+            objective.timeblock = timeBlockNameMap.get(sp_TimeBlock.getSelectedItem().toString());
+            objective.timeblockId = timeBlockNameMap.get(sp_TimeBlock.getSelectedItem().toString()).id;
+
+            if(category.equals(APP_EDIT)) {
+                objective.id = existingObj.id;
+                dbh.updateObjective(objective);
+            }
+            else {
+                dbh.createObjective(objective);
+            }
+
+            Intent mainActivity = new Intent(this, MainActivity.class);
+            startActivity(mainActivity);
+        }
+
     }
 
     public void onClickDeleteObjective(View v, Objective obj) {
@@ -156,12 +175,18 @@ public class ObjectivePage extends AppCompatActivity {
     private void populateValues() {
         Log.d("***DEBUG***", "inside populateValues");
 
+        String hours = String.valueOf(Integer.valueOf(existingObj.duration) / 60);
+        String minutes = String.valueOf(Integer.valueOf(existingObj.duration) % 60);
+
         et_name.setText(existingObj.name);
         et_description.setText(existingObj.description);
-        et_duration.setText(existingObj.duration);
+        et_hours.setText(hours);
+        et_minutes.setText(minutes);
         et_effort.setText(existingObj.effort);
-        sp_TimeBlock.setSelection(Arrays.asList(timeblockNameList).indexOf(timeBlocksMap.get(existingObj.timeblock.id).name));
+        sp_TimeBlock.setSelection(Arrays.asList(timeblockNameList).indexOf(timeBlockIdMap.get(existingObj.timeblock.id).name));
         sp_Frequency.setSelection(Arrays.asList(freqArray).indexOf(existingObj.frequency));
+
+        deleteObjective.setVisibility(View.VISIBLE);
 
         deleteObjective.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -173,7 +198,8 @@ public class ObjectivePage extends AppCompatActivity {
 
     private void setDefaultTimeBlock() {
         Log.d("***DEBUG***", "inside setDefaultTimeBlock");
-        sp_TimeBlock.setSelection(Arrays.asList(timeblockNameList).indexOf(timeBlocksMap.get(timeblockId).name));
+
+        sp_TimeBlock.setSelection(timeblockNameList.indexOf(timeBlockIdMap.get(timeblockId).name));
     }
 
 }

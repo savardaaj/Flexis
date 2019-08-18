@@ -3,6 +3,7 @@ package com.asav.flexis;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -81,6 +82,7 @@ public class TimeBlockPage extends AppCompatActivity {
         tv_BlockStartTime = cl.findViewById(R.id.tv_BlockStartTime);
         tv_BlockEndTime = cl.findViewById(R.id.tv_BlockEndTime);
         btnDeleteTimeBlock = cl.findViewById(R.id.btn_deleteTimeBlock);
+        btnDeleteTimeBlock.setVisibility(View.INVISIBLE);
     }
 
     public void setupTimePickers() {
@@ -176,6 +178,8 @@ public class TimeBlockPage extends AppCompatActivity {
     private void populateFields() {
         Log.d("***DEBUG***", "inside populateFields");
 
+        btnDeleteTimeBlock.setVisibility(View.VISIBLE);
+
         et_name.setText(existingTimeBlock.name);
         et_description.setText(existingTimeBlock.description);
         //start and end times
@@ -206,26 +210,40 @@ public class TimeBlockPage extends AppCompatActivity {
 
         TimeBlock timeblock = new TimeBlock();
         timeblock.userId = "test123";
-        timeblock.name = et_name.getText().toString();
-        timeblock.description = et_description.getText().toString();
-        timeblock.startTime = tv_BlockStartTime.getText().toString();
-        timeblock.endTime = tv_BlockEndTime.getText().toString();
 
-        Log.d("***DEBUG***", "Before conversion: " + timeblock.startTime);
-        timeblock.startTimestamp = TimeConverter.convertToGMTFromDisplay(timeblock.startTime);
-        Log.d("***DEBUG***", "After conversion: " + timeblock.startTimestamp);
-        timeblock.endTimestamp = TimeConverter.convertToGMTFromDisplay(timeblock.endTime);
-
-        if(existingTimeBlock != null) {
-            timeblock.id = existingTimeBlock.id;
-            dbh.updateTimeBlock(timeblock);
+        if(TextUtils.isEmpty(et_name.getText())) {
+            et_name.setError( "Name is required!" );
         }
-        else {
-            dbh.createTimeBlock(timeblock);
+        if(tv_BlockStartTime.getText().toString().equals("Start Time")) {
+            tv_BlockStartTime.setError( "Start time is required!" );
+        }
+        if(tv_BlockEndTime.getText().toString().equals("End Time")) {
+            tv_BlockEndTime.setError( "End time is required!" );
         }
 
-        Intent mainActivity = new Intent(this, MainActivity.class);
-        startActivity(mainActivity);
+        if(et_name.getError() == null && tv_BlockStartTime.getError() == null && tv_BlockEndTime.getError() == null) {
+            timeblock.name = et_name.getText().toString();
+            timeblock.description = et_description.getText().toString();
+            timeblock.startTime = tv_BlockStartTime.getText().toString();
+            timeblock.endTime = tv_BlockEndTime.getText().toString();
+
+            Log.d("***DEBUG***", "Before conversion: " + timeblock.startTime);
+            timeblock.startTimestamp = TimeConverter.convertToGMTFromDisplay(timeblock.startTime);
+            Log.d("***DEBUG***", "After conversion: " + timeblock.startTimestamp);
+            timeblock.endTimestamp = TimeConverter.convertToGMTFromDisplay(timeblock.endTime);
+
+            if(existingTimeBlock != null) {
+                timeblock.id = existingTimeBlock.id;
+                dbh.updateTimeBlock(timeblock);
+            }
+            else {
+                dbh.createTimeBlock(timeblock);
+            }
+
+            Intent mainActivity = new Intent(this, MainActivity.class);
+            startActivity(mainActivity);
+        }
+
     }
 
     public void onClickDeleteTimeBlock(View v, TimeBlock tb) {

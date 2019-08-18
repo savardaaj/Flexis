@@ -291,6 +291,7 @@ public class DatabaseHandler {
     }
 
     public void deleteTimeBlock(View v, TimeBlock tb) {
+        Log.d("***DEBUG***", "inside deleteTimeBlock");
 
         final TimeBlock timeBlock = tb;
 
@@ -315,6 +316,8 @@ public class DatabaseHandler {
     }
 
     public void deleteObjective(View v, Objective obj) {
+        Log.d("***DEBUG***", "inside deleteObjective");
+
         db.collection("objectives")
                 .document(obj.id)
                 .delete()
@@ -334,6 +337,7 @@ public class DatabaseHandler {
     }
 
     private void removeTimeBlockIdReferences(TimeBlock tb) {
+        Log.d("***DEBUG***", "inside removeTimeBlockIdReferences");
 
         //query all objectives where timeblockid is param
         //update id to null
@@ -363,6 +367,7 @@ public class DatabaseHandler {
     }
 
     public void updateObjectives(List<Objective> objList) {
+        Log.d("***DEBUG***", "inside updateObjectives");
 
         for(Objective o : objList) {
 
@@ -391,6 +396,7 @@ public class DatabaseHandler {
     }
 
     public void updateTimeBlock(TimeBlock tb) {
+        Log.d("***DEBUG***", "inside updateTimeBlock");
 
         Map<String, Object> timeblock = new HashMap<>();
         timeblock.put("userId", tb.userId);
@@ -424,15 +430,4 @@ public class DatabaseHandler {
 
     }
 
-    private Date convertToMilitary(String time) {
-        String actualTime = time.substring(0, 5);
-        String ampm = time.substring(6, 8);
-        //Date newTime = Calendar.getInstance().setTime(actualTime);
-        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
-
-        if(ampm.equals("pm")) {
-
-        }
-        return null;
-    }
 }
