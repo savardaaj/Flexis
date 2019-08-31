@@ -143,9 +143,22 @@ public class ObjectivePage extends AppCompatActivity {
 
         //Don't move on if there are errors
         if(et_name.getError() == null && et_hours.getError() == null && et_minutes.getError() == null) {
+            int hours, mins;
             objective.name = et_name.getText().toString();
             objective.description = et_description.getText().toString();
-            objective.duration = (Integer.valueOf(et_hours.getText().toString()) * 60 ) + Integer.valueOf(et_minutes.getText().toString()) + ""; //convert to minutes
+            if(!et_hours.getText().toString().equals("")) {
+                hours = Integer.valueOf(et_hours.getText().toString()) * 60;
+            }
+            else {
+                hours = 0;
+            }
+            if(!et_minutes.getText().toString().equals("")) {
+                mins = Integer.valueOf(et_minutes.getText().toString());
+            }
+            else {
+                mins = 0;
+            }
+            objective.duration = hours + mins + ""; //convert to minutes
             objective.effort = et_effort.getText().toString();
             objective.frequency = sp_Frequency.getSelectedItem().toString();
 

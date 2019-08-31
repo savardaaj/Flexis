@@ -1,6 +1,7 @@
 package com.asav.flexis;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,12 +13,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentManager;
+import androidx.navigation.ui.AppBarConfiguration;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.gson.Gson;
@@ -61,22 +65,71 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
     TextView tv_main_todaydate;
     TextView tv_card_begin;
 
+    private DrawerLayout dl;
+    private ActionBarDrawerToggle t;
+    private NavigationView nv;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("***DEBUG***", "inside onCreate MainActivity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        notificationHandler = new NotificationHandler(this, MainActivity.class);
+        initDrawerItems();
 
-        //mDrawerLayout = findViewById(R.id.drawer_layout);
+        notificationHandler = new NotificationHandler(this, MainActivity.class);
 
         setTodaysDate();
         getTimeBlocksAndObjectives();
-        //initializeNavigationView();
 
         //reset isComplete flag if necessary
 
+    }
+
+    private void initDrawerItems() {
+
+
+        dl = findViewById(R.id.activity_main);
+        t = new ActionBarDrawerToggle(this, dl, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+
+        dl.addDrawerListener(t);
+        t.syncState();
+
+        if(getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        nv = findViewById(R.id.nv);
+        nv.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int id = item.getItemId();
+                switch(id)
+                {
+                    case R.id.objective_list:
+                        Toast.makeText(MainActivity.this, "Obj List",Toast.LENGTH_SHORT).show();break;
+                    case R.id.settings:
+                        Toast.makeText(MainActivity.this, "Settings",Toast.LENGTH_SHORT).show();break;
+                    case R.id.timeblock_list:
+                        Toast.makeText(MainActivity.this, "Timeblock List",Toast.LENGTH_SHORT).show();break;
+                    default:
+                        return true;
+                }
+
+                return true;
+
+            }
+        });
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if(t.onOptionsItemSelected(item))
+            return true;
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void setTodaysDate() {
@@ -202,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
                     if(currentTB != null && timeblockObjsMap.containsKey(currentTB.id)) {
                         for (Objective obj : timeblockObjsMap.get(currentTB.id)) {
 
-                            if (!obj.isComplete) {
+                            //if (!obj.isComplete) {
                                 //setup layout stuff
 
                                 final View objectiveCard = inflater.inflate(R.layout.objective_card_component, null, false);
@@ -249,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
                                 objectivesViewMap.put(objectiveCard, obj);
 
                                 llGroupList.add(newGroup);
-                            }
+                            //}
                         }
                     }
                 //}
@@ -325,7 +378,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
                 if (timer.isRunning) {
                     Log.d("***Debug***", "Timer: " + timer.elapsedTime + " : " + timer.desiredTimeInMilliSeconds );
                     if(timer.elapsedTime > timer.desiredTimeInMilliSeconds) {
-                        finishObjective(objective);
+                        finishObjective(objective, objectiveCard);
                     }
                     else if(timer.elapsedTime > 0) {
                         timer.pauseTimer();
@@ -347,8 +400,11 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         }
     }
 
-    private void finishObjective(Objective objective) {
+    private void finishObjective(Objective objective, View objCard) {
         Log.d("***Debug***", "inside finishObjective");
+
+        //get the view card and set as completed visually
+        markFinished(objCard);
 
         //mark objective to be excluded from list
         objective.isComplete = true;
@@ -473,9 +529,6 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
     }
 
     private void showObjectiveOptionsDialog(final String tbId) {
-        /*FragmentManager fm = getSupportFragmentManager();
-        FragmentAddObjectiveOptions objOptionsFragment = FragmentAddObjectiveOptions.newInstance("Choose from...", tbId);
-        objOptionsFragment.show(fm, "fragment_add_objective_options");*/
         LayoutInflater inflater = getLayoutInflater();
         View dialoglayout = inflater.inflate(R.layout.fragment_add_objective_options, null);
         TextView tvNew = dialoglayout.findViewById(R.id.tv_from_new);
@@ -534,6 +587,11 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         }
     }
 
+    private void markFinished(View objCard) {
+        objCard.setBackgroundColor(Color.GREEN);
+
+        objCard.refreshDrawableState();
+    }
 
 
 }

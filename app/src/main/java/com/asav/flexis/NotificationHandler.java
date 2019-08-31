@@ -37,7 +37,7 @@ public class NotificationHandler {
 
         // Create an explicit intent for an Activity in your app
         Intent intent = new Intent(context, callingClass);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
 
@@ -46,7 +46,9 @@ public class NotificationHandler {
                 .setContentTitle("My notification")
                 .setContentText("Much longer text that cannot fit one line...")
                 .setStyle(new NotificationCompat.BigTextStyle()
-                        .bigText("Much longer text that cannot fit one line..."))
+                    .bigText("Much longer text that cannot fit one line..."))
+                // Set the intent that will fire when the user taps the notification
+                .setContentIntent(pendingIntent)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);

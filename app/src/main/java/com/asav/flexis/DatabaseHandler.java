@@ -138,6 +138,7 @@ public class DatabaseHandler {
         objective.put("timeblock", obj.timeblock);
         objective.put("timeblockId", obj.timeblockId);
         objective.put("isComplete", obj.isComplete);
+        objective.put("dateCompleted", obj.dateCompleted);
 
         // Update document with a generated ID
         db.collection("objectives").document(obj.id)

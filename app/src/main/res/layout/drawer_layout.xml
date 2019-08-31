@@ -22,7 +22,7 @@
         android:background="@color/cardview_light_background"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
-        app:menu="@menu/drawer_view" />
+        app:menu="@menu/navigation_menu" />
 
 
 </androidx.core.widget.DrawerLayout>
