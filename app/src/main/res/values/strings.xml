@@ -34,13 +34,18 @@
     <string name="obj_card_frequency_example">Reoccurs: Every 10 minutes</string>
     <string name="obj_card_timeblock_example">Morning</string>
 
-    <string name="task_list">Task List</string>
+    <string name="new_timeblock">New Timeblock</string>
+    <string name="objective_list">Objective List</string>
     <string name="timeblock_list">Timeblock List</string>
+    <string name="settings">Settings</string>
 
     <string name="nav_header">Flexi</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+    <string name="end_task">End Task</string>
+    <string name="add_5_minutes"> +5 min </string>
+    <string name="add_10_minutes"> +10 min </string>
 
 </resources>

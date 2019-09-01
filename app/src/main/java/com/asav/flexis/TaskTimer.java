@@ -1,6 +1,7 @@
 package com.asav.flexis;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.SystemClock;
 import android.view.View;
 import android.widget.Chronometer;
@@ -29,6 +30,7 @@ public class TaskTimer {
         cmCardTimer = v.findViewById(R.id.cm_timer);
         cardAction = v.findViewById(R.id.tv_card_action);
 
+
         cmCardTimer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             long hours = 0, minutes = 0, seconds = 0;
             public void onChronometerTick(Chronometer arg0) {
@@ -51,7 +53,6 @@ public class TaskTimer {
                     mainActivity.onClickCreateNotification(v);
                     cardAction.setText("Finish");
                 }
-
             }
         });
     }
@@ -91,4 +92,6 @@ public class TaskTimer {
         this.desiredTime = String.format("%02d:%02d:%02d", desiredHours, desiredMinutes, desiredSeconds);
         this.desiredTimeInMilliSeconds = (desiredSeconds + (desiredMinutes * 60) + (desiredHours * 3600)) * 1000;
     }
+
+
 }

@@ -2,17 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/new_timeblock"
+            android:icon="@drawable/ic_add_calendar_symbol_for_events"
+            android:title="@string/new_timeblock"/>
+        <item
             android:id="@+id/objective_list"
-            android:icon="@drawable/ic_add"
-            android:title="@string/task_list" />
+            android:icon="@drawable/ic_tasklist"
+            android:title="@string/objective_list" />
         <item
             android:id="@+id/timeblock_list"
             android:icon="@drawable/ic_timetable"
             android:title="@string/timeblock_list" />
         <item
             android:id="@+id/settings"
-            android:icon="@drawable/ic_settings"
-            android:title="@string/timeblock_list"/>
+            android:icon="@drawable/ic_settings_gears"
+            android:title="@string/settings"/>
     </group>
 
 </menu>

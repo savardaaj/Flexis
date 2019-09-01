@@ -15,69 +15,6 @@
     android:background="@color/colorPrimaryDark"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/btn_main_add_timeblock"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:onClick="onClickNewTimeBlock"
-        android:text="New Time Block"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_main_todaydate" />
-
-    <Button
-        android:id="@+id/btn_main_add_objective"
-        android:layout_width="139dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:onClick="onClickNewObjective"
-        android:text="New Objective"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_main_todaydate" />
-
-    <Button
-        android:id="@+id/btnNotify"
-        android:layout_width="67dp"
-        android:layout_height="37dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="8dp"
-        android:onClick="onClickCreateNotification"
-        android:text="notify"
-        android:textSize="9sp"
-        app:layout_constraintEnd_toStartOf="@+id/tv_main_today"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_main_today"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:fontFamily="@font/comfortaa"
-        android:text="@string/today"
-        android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.329"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tv_main_todaydate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:fontFamily="@font/comfortaa"
-        android:text=" January 21, 2019"
-        android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/tv_main_today"
-        app:layout_constraintTop_toTopOf="parent" />
-
-
 
     <ScrollView
         android:id="@+id/sv_main_container"
@@ -87,13 +24,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_main_add_timeblock">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:id="@+id/ll_group_wrapper"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"/>
+            android:orientation="vertical" />
     </ScrollView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

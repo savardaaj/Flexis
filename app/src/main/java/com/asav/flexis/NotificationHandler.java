@@ -11,6 +11,8 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import android.view.View;
 
+import static android.app.Notification.EXTRA_NOTIFICATION_ID;
+
 public class NotificationHandler {
 
     Context context;
@@ -38,18 +40,26 @@ public class NotificationHandler {
         // Create an explicit intent for an Activity in your app
         Intent intent = new Intent(context, callingClass);
         //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        //Intent snoozeIntent = new Intent(this, MyBroadcastReceiver.class);
+        //snoozeIntent.setAction(ACTION_SNOOZE);
+        //snoozeIntent.putExtra(EXTRA_NOTIFICATION_ID, 0);
+
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
-
+        //add actions for ending, adding 5 min, adding 10 min
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, "1")
                 .setSmallIcon(R.drawable.common_google_signin_btn_icon_dark)
-                .setContentTitle("My notification")
+                .setContentTitle("My notification") //get task name
                 .setContentText("Much longer text that cannot fit one line...")
                 .setStyle(new NotificationCompat.BigTextStyle()
                     .bigText("Much longer text that cannot fit one line..."))
                 // Set the intent that will fire when the user taps the notification
                 .setContentIntent(pendingIntent)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .addAction(R.string.end_task, "End Task", pendingIntent)
+                .addAction(R.string.add_5_minutes, "+5 min", pendingIntent)
+                .addAction(R.string.add_10_minutes, "+10 min", pendingIntent);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
 

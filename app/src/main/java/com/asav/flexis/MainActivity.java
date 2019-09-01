@@ -1,10 +1,14 @@
 package com.asav.flexis;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -48,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
     static final String APP_EDIT = "2";
     static final String APP_DELETE = "3";
 
+    public static String LOG_DEBUG = "***DEBUG***";
+
 
     DatabaseHandler dbh = new DatabaseHandler();
     NotificationHandler notificationHandler;
@@ -62,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
 
     List<LinearLayout> llGroupList = new ArrayList<>();
 
-    TextView tv_main_todaydate;
+    TextView toolbar_title;
     TextView tv_card_begin;
 
     private DrawerLayout dl;
@@ -71,9 +78,11 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("***DEBUG***", "inside onCreate MainActivity");
+        Log.d(LOG_DEBUG, "inside onCreate MainActivity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //getMenuInflater().inflate(R.menu.options, menu);
 
         initDrawerItems();
 
@@ -87,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
     }
 
     private void initDrawerItems() {
-
 
         dl = findViewById(R.id.activity_main);
         t = new ActionBarDrawerToggle(this, dl, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -106,12 +114,31 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
                 int id = item.getItemId();
                 switch(id)
                 {
+
+                    case R.id.new_timeblock:
+                        Toast.makeText(MainActivity.this, "New Timeblock",Toast.LENGTH_SHORT).show();
+                        onClickNewTimeBlock(null);
+                        break;
+
                     case R.id.objective_list:
-                        Toast.makeText(MainActivity.this, "Obj List",Toast.LENGTH_SHORT).show();break;
+                        Toast.makeText(MainActivity.this, "Objective List",Toast.LENGTH_SHORT).show();
+
+                        break;
+
+
                     case R.id.settings:
-                        Toast.makeText(MainActivity.this, "Settings",Toast.LENGTH_SHORT).show();break;
+                        Toast.makeText(MainActivity.this, "Settings",Toast.LENGTH_SHORT).show();
+
+                        break;
+
+
                     case R.id.timeblock_list:
-                        Toast.makeText(MainActivity.this, "Timeblock List",Toast.LENGTH_SHORT).show();break;
+                        Toast.makeText(MainActivity.this, "Timeblock List",Toast.LENGTH_SHORT).show();
+
+                        break;
+
+
+
                     default:
                         return true;
                 }
@@ -126,21 +153,39 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.options_notify) {
+            Toast.makeText(MainActivity.this, "Action clicked", Toast.LENGTH_LONG).show();
+            notificationHandler.createNotification(null);
+            return true;
+        }
+
         if(t.onOptionsItemSelected(item))
             return true;
 
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.options, menu);
+        return true;
+    }
+
+
     public void setTodaysDate() {
         Log.d("***DEBUG***", "inside setTodaysDate");
-
-        tv_main_todaydate = findViewById(R.id.tv_main_todaydate);
 
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat format = new SimpleDateFormat("MMMM d, yyyy");
         String todaysDate = format.format(cal.getTime());
-        tv_main_todaydate.setText(todaysDate);
+        getSupportActionBar().setTitle(todaysDate);
     }
 
     public void onClickNewTimeBlock(View v) {
@@ -374,22 +419,22 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
                 }
             }
 
-            if(timer != null) {
-                if (timer.isRunning) {
-                    Log.d("***Debug***", "Timer: " + timer.elapsedTime + " : " + timer.desiredTimeInMilliSeconds );
-                    if(timer.elapsedTime > timer.desiredTimeInMilliSeconds) {
-                        finishObjective(objective, objectiveCard);
-                    }
-                    else if(timer.elapsedTime > 0) {
-                        timer.pauseTimer();
-                    }
-                } else {
-                    if(timer.elapsedTime == 0) {
-                        timer.startTimer();
 
-                    } else {
-                        timer.resumeTimer();
-                    }
+            if(timer != null && timer.isRunning) {
+                Log.d("***Debug***", "Timer: " + timer.elapsedTime + " : " + timer.desiredTimeInMilliSeconds );
+                if(timer.elapsedTime > timer.desiredTimeInMilliSeconds) {
+                    finishObjective(objective, objectiveCard);
+                }
+                else if(timer.elapsedTime > 0) {
+                    timer.pauseTimer();
+                }
+            } else {
+                if(timer.elapsedTime == 0) {
+                    //startService(new Intent(this, BroadcastService.class));
+                    timer.startTimer();
+
+                } else {
+                    timer.resumeTimer();
                 }
             }
         }
@@ -397,6 +442,50 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
             Log.d("***ERROR***", "objectiveActionClicked: " + e.getMessage());
             Log.d("***ERROR***", "objectiveActionClicked: " + e);
             Toast.makeText(this, "Error Occurred", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private BroadcastReceiver br = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateGUI(intent); // or whatever method used to update your GUI fields
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        registerReceiver(br, new IntentFilter(BroadcastService.TASKTIMER_BR));
+        Log.i(LOG_DEBUG, "Registered broacast receiver");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(br);
+        Log.i(LOG_DEBUG, "Unregistered broacast receiver");
+    }
+
+    @Override
+    public void onStop() {
+        try {
+            unregisterReceiver(br);
+        } catch (Exception e) {
+            // Receiver was probably already stopped in onPause()
+        }
+        super.onStop();
+    }
+    @Override
+    public void onDestroy() {
+        stopService(new Intent(this, BroadcastService.class));
+        Log.i(LOG_DEBUG, "Stopped service");
+        super.onDestroy();
+    }
+
+    private void updateGUI(Intent intent) {
+        if (intent.getExtras() != null) {
+            long millisUntilFinished = intent.getLongExtra("countdown", 0);
+            Log.i(LOG_DEBUG, "Countdown seconds remaining: " +  millisUntilFinished / 1000);
         }
     }
 
