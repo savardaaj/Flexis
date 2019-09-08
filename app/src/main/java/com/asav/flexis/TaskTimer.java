@@ -30,7 +30,6 @@ public class TaskTimer {
         cmCardTimer = v.findViewById(R.id.cm_timer);
         cardAction = v.findViewById(R.id.tv_card_action);
 
-
         cmCardTimer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             long hours = 0, minutes = 0, seconds = 0;
             public void onChronometerTick(Chronometer arg0) {

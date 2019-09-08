@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Map.Entry.comparingByValue;
@@ -454,22 +455,37 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
 
     @Override
     public void onResume() {
+        Log.d(LOG_DEBUG, "inside onResume");
         super.onResume();
-        registerReceiver(br, new IntentFilter(BroadcastService.TASKTIMER_BR));
-        Log.i(LOG_DEBUG, "Registered broacast receiver");
+        //registerReceiver(br, new IntentFilter(BroadcastService.TASKTIMER_BR));
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            Log.d(LOG_DEBUG, "get extras on Resume");
+            if (extras.containsKey("endTask")) {
+                Objective obj = (Objective) extras.get("objectiveSON");
+
+                if(obj != null) {
+                    View v = getKeyByValue(objectivesViewMap, obj);
+                    finishObjective(obj, v);
+                }
+            }
+        }
+
+        Log.d(LOG_DEBUG, "Registered broadcast receiver");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(br);
-        Log.i(LOG_DEBUG, "Unregistered broacast receiver");
+        //unregisterReceiver(br);
+        Log.d(LOG_DEBUG, "Unregistered broadcast receiver");
     }
 
     @Override
     public void onStop() {
         try {
-            unregisterReceiver(br);
+            //unregisterReceiver(br);
         } catch (Exception e) {
             // Receiver was probably already stopped in onPause()
         }
@@ -682,5 +698,13 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         objCard.refreshDrawableState();
     }
 
+    public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+        for (Map.Entry<T, E> entry : map.entrySet()) {
+            if (Objects.equals(value, entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 
 }
