@@ -81,7 +81,9 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
     protected void onCreate(Bundle savedInstanceState) {
         Log.d(LOG_DEBUG, "inside onCreate MainActivity");
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
+        findViewById(R.id.loadingPanel).setVisibility(View.VISIBLE);
 
         //getMenuInflater().inflate(R.menu.options, menu);
 
@@ -94,6 +96,62 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
 
         //reset isComplete flag if necessary
 
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            String objJSON = extras.getString("objectiveJSON");
+            Log.d(LOG_DEBUG, "objJSON: " + objJSON);
+            Objective obj = new Gson().fromJson(objJSON, Objective.class);
+
+            if(obj != null) {
+                View v = getKeyByValue(objectivesViewMap, obj);
+                finishObjective(obj, v);
+            }
+        }
+    }
+
+    @Override
+    public void onResume() {
+        Log.d(LOG_DEBUG, "inside onResume");
+        super.onResume();
+        //registerReceiver(br, new IntentFilter(BroadcastService.TASKTIMER_BR));
+
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            Log.d(LOG_DEBUG, "get extras on Resume");
+            String objJSON = extras.getString("objectiveJSON");
+            int uniqueId = extras.getInt("notifUniqueId");
+            Log.d(LOG_DEBUG, "objJSON: " + objJSON);
+            Objective obj = new Gson().fromJson(objJSON, Objective.class);
+
+            if(obj != null) {
+                notificationHandler.cancelNotification(uniqueId);
+                View v = getKeyByValue(objectivesViewMap, obj);
+                finishObjective(obj, v);
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        //unregisterReceiver(br);
+        Log.d(LOG_DEBUG, "Unregistered broadcast receiver");
+    }
+
+    @Override
+    public void onStop() {
+        try {
+            //unregisterReceiver(br);
+        } catch (Exception e) {
+            // Receiver was probably already stopped in onPause()
+        }
+        super.onStop();
+    }
+    @Override
+    public void onDestroy() {
+        stopService(new Intent(this, BroadcastService.class));
+        Log.i(LOG_DEBUG, "Stopped service");
+        super.onDestroy();
     }
 
     private void initDrawerItems() {
@@ -263,6 +321,11 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
             }
         }
 
+        View loadingPanel = findViewById(R.id.loadingPanel);
+        if (loadingPanel != null) {
+            loadingPanel.setVisibility(View.GONE);
+        }
+
         LayoutInflater inflater = LayoutInflater.from(this);
         LinearLayout ll_group_wrapper = findViewById(R.id.ll_group_wrapper);
         ll_group_wrapper.removeAllViews();
@@ -300,55 +363,57 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
                     // for each objective in a timeblock
                     if(currentTB != null && timeblockObjsMap.containsKey(currentTB.id)) {
                         for (Objective obj : timeblockObjsMap.get(currentTB.id)) {
+                            //setup layout stuff
 
-                            //if (!obj.isComplete) {
-                                //setup layout stuff
+                            final View objectiveCard = inflater.inflate(R.layout.objective_card_component, null, false);
+                            objectiveCard.setPadding(0, 0, 0, 10);
+                            objectiveCard.setTag(obj);
 
-                                final View objectiveCard = inflater.inflate(R.layout.objective_card_component, null, false);
-                                objectiveCard.setPadding(0, 0, 0, 10);
-                                objectiveCard.setTag(obj);
+                            CardView cvActionObjective = objectiveCard.findViewById(R.id.cv_card_action);
+                            cvActionObjective.setOnClickListener(onClickActionObjective);
 
-                                CardView cvActionObjective = objectiveCard.findViewById(R.id.cv_card_action);
-                                cvActionObjective.setOnClickListener(onClickActionObjective);
+                            //initialize the layout fields
+                            TextView objectiveName = objectiveCard.findViewById(R.id.tv_objCard_Name);
+                            //TextView objectiveDescription =  objectiveCard.findViewById(R.id.);
+                            TextView objectiveDuration = objectiveCard.findViewById(R.id.tv_objCard_Duration);
+                            TextView objectiveEffort = objectiveCard.findViewById(R.id.tv_objCard_Effort);
+                            //TextView objectiveFrequency =  objectiveCard.findViewById(R.id.tv_objCard_Frequency);
 
-                                //initialize the layout fields
-                                TextView objectiveName = objectiveCard.findViewById(R.id.tv_objCard_Name);
-                                //TextView objectiveDescription =  objectiveCard.findViewById(R.id.);
-                                TextView objectiveDuration = objectiveCard.findViewById(R.id.tv_objCard_Duration);
-                                TextView objectiveEffort = objectiveCard.findViewById(R.id.tv_objCard_Effort);
-                                //TextView objectiveFrequency =  objectiveCard.findViewById(R.id.tv_objCard_Frequency);
+                            //set values of imported components
+                            objectiveName.setText(obj.name);
+                            //objectiveDescription.setText(obj.description);
+                            String objDuration = "0";
+                            if (obj.duration != null && !obj.duration.equals("")) {
+                                objDuration = parseDuration(Integer.parseInt(obj.duration));
+                                TaskTimer timer = new TaskTimer(this, objectiveCard, Integer.parseInt(obj.duration));
 
-                                //set values of imported components
-                                objectiveName.setText(obj.name);
-                                //objectiveDescription.setText(obj.description);
-                                String objDuration = "0";
-                                if (obj.duration != null && !obj.duration.equals("")) {
-                                    objDuration = parseDuration(Integer.parseInt(obj.duration));
-                                    TaskTimer timer = new TaskTimer(this, objectiveCard, Integer.parseInt(obj.duration));
+                                timerMap.put(obj, timer);
+                            }
 
-                                    timerMap.put(obj, timer);
-                                }
+                            objectiveDuration.setText(objDuration);
+                            objectiveEffort.setText(obj.effort);
+                            objectiveCard.setOnClickListener(onClickEditObjective);
 
-                                objectiveDuration.setText(objDuration);
-                                objectiveEffort.setText(obj.effort);
-                                objectiveCard.setOnClickListener(onClickEditObjective);
+                            //objectiveFrequency.setText(obj.frequency);
 
-                                //objectiveFrequency.setText(obj.frequency);
+                            //Add margins to card for spacing, height, width
+                            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.MATCH_PARENT
+                            );
+                            params.setMargins(0, 5, 0, 5);
+                            objectiveCard.setLayoutParams(params);
+                            newGroup.addView(objectiveCard);
 
-                                //Add margins to card for spacing, height, width
-                                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                                        LinearLayout.LayoutParams.MATCH_PARENT
-                                );
-                                params.setMargins(0, 5, 0, 5);
-                                objectiveCard.setLayoutParams(params);
-                                newGroup.addView(objectiveCard);
+                            objectiveCard.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
+                            objectivesViewMap.put(objectiveCard, obj);
 
-                                objectiveCard.getLayoutParams().width = LinearLayout.LayoutParams.MATCH_PARENT;
-                                objectivesViewMap.put(objectiveCard, obj);
+                            if (obj.isComplete) {
+                                objectiveCard.findViewById(R.id.iv_completed).setVisibility(View.VISIBLE);
+                                objectiveCard.findViewById(R.id.cv_card_action).setVisibility(View.GONE);
+                            }
 
-                                llGroupList.add(newGroup);
-                            //}
+                            llGroupList.add(newGroup);
                         }
                     }
                 //}
@@ -453,50 +518,7 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
         }
     };
 
-    @Override
-    public void onResume() {
-        Log.d(LOG_DEBUG, "inside onResume");
-        super.onResume();
-        //registerReceiver(br, new IntentFilter(BroadcastService.TASKTIMER_BR));
 
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            Log.d(LOG_DEBUG, "get extras on Resume");
-            if (extras.containsKey("endTask")) {
-                Objective obj = (Objective) extras.get("objectiveSON");
-
-                if(obj != null) {
-                    View v = getKeyByValue(objectivesViewMap, obj);
-                    finishObjective(obj, v);
-                }
-            }
-        }
-
-        Log.d(LOG_DEBUG, "Registered broadcast receiver");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        //unregisterReceiver(br);
-        Log.d(LOG_DEBUG, "Unregistered broadcast receiver");
-    }
-
-    @Override
-    public void onStop() {
-        try {
-            //unregisterReceiver(br);
-        } catch (Exception e) {
-            // Receiver was probably already stopped in onPause()
-        }
-        super.onStop();
-    }
-    @Override
-    public void onDestroy() {
-        stopService(new Intent(this, BroadcastService.class));
-        Log.i(LOG_DEBUG, "Stopped service");
-        super.onDestroy();
-    }
 
     private void updateGUI(Intent intent) {
         if (intent.getExtras() != null) {
@@ -693,9 +715,14 @@ public class MainActivity extends AppCompatActivity implements FragmentAddObject
     }
 
     private void markFinished(View objCard) {
-        objCard.setBackgroundColor(Color.GREEN);
 
-        objCard.refreshDrawableState();
+        if (objCard != null) {
+            //objCard.setBackgroundColor(Color.GREEN);
+
+            //objCard.refreshDrawableState();
+
+        }
+
     }
 
     public static <T, E> T getKeyByValue(Map<T, E> map, E value) {

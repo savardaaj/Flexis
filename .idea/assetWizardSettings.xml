@@ -19,8 +19,8 @@
                         <option name="values">
                           <map>
                             <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_add_calendar_symbol_for_events" />
-                            <entry key="sourceFile" value="C:\Users\Alex\Downloads\add-calendar-symbol-for-events.svg" />
+                            <entry key="outputName" value="ic_checked" />
+                            <entry key="sourceFile" value="C:\Users\Alex\Downloads\checked.svg" />
                           </map>
                         </option>
                       </PersistentState>

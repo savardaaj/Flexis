@@ -44,6 +44,19 @@
         app:layout_constraintStart_toEndOf="@+id/tv_objCard_Effort"
         app:layout_constraintTop_toBottomOf="@+id/tv_objCard_Name" />
 
+    <ImageView
+        android:id="@+id/iv_completed"
+        android:layout_width="32dp"
+        android:layout_height="30dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/tv_objCard_Name"
+        app:layout_constraintHorizontal_bias="0.921"
+        app:layout_constraintStart_toStartOf="@+id/tv_objCard_Name"
+        app:layout_constraintTop_toTopOf="@+id/tv_objCard_Name"
+        app:layout_constraintVertical_bias="0.428"
+        app:srcCompat="@drawable/ic_checked" />
+
     <androidx.cardview.widget.CardView
         android:id="@+id/cv_card_action"
         android:layout_width="wrap_content"

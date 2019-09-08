@@ -52,7 +52,7 @@ public class DatabaseHandler {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d("***DEBUG***", document.getId() + " => " + document.getData());
                                 Objective obj = document.toObject(Objective.class);
-                                obj.isComplete = false;
+                                //obj.isComplete = false;
                                 objectivesMap.put(obj.id, obj);
                             }
                             MA.setObjectivesMap(objectivesMap);

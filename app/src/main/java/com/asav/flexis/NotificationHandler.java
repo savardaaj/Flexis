@@ -11,17 +11,21 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 
 import static android.app.Notification.EXTRA_NOTIFICATION_ID;
+import static com.asav.flexis.MainActivity.LOG_DEBUG;
 
 public class NotificationHandler {
 
     Context context;
     Class callingClass;
+
+    NotificationManagerCompat notificationManager;
 
     public NotificationHandler(Context context, Class aClass) {
         this.context = context;
@@ -31,6 +35,7 @@ public class NotificationHandler {
     public void createNotification(View v) {
 
         String objectiveName = ((TextView) (v.findViewById(R.id.tv_objCard_Name))).getText().toString();
+        int uniqueInt = (int) (System.currentTimeMillis() & 0xfffffff);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = "name";
@@ -55,14 +60,16 @@ public class NotificationHandler {
 
         Gson gson = new Gson();
         String objectiveJSON = gson.toJson(v.getTag());
+        Log.d(LOG_DEBUG, "ObjJSON NOTIF HANDLER: " + objectiveJSON);
         Bundle extras = new Bundle();
         Intent endTaskIntent = new Intent(context, MainActivity.class);
-        //extras.putParcelable("user", user);
+
         extras.putString("objectiveJSON", objectiveJSON);
         extras.putString("endTask", "EndTask");
+        extras.putInt("notifUniqueId", uniqueInt);
         endTaskIntent.putExtras(extras);
 
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, endTaskIntent, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, uniqueInt, endTaskIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         //add actions for ending, adding 5 min, adding 10 min
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, "1")
@@ -78,10 +85,16 @@ public class NotificationHandler {
                 .addAction(R.string.add_5_minutes, "+5 min", pendingIntent)
                 .addAction(R.string.add_10_minutes, "+10 min", pendingIntent);
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
+        notificationManager = NotificationManagerCompat.from(context);
 
         // notificationId is a unique int for each notification that you must define
-        notificationManager.notify(0, mBuilder.build());
+        notificationManager.notify(uniqueInt, mBuilder.build());
+    }
+
+    public void cancelNotification(int id) {
+
+        notificationManager.cancel(id);
+
     }
 
 }
